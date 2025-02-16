@@ -92,6 +92,84 @@ std::istream & operator>>(std::istream &is, Suit &suit) {
 
 
 /////////////// Write your implementation for Card below ///////////////
+//Card()
+Card::Card() : rank(TWO), suit(SPADES) {}
+
+//Card(Rank rank_in, Suit suit_in)
+Card::Card(Rank rank_in, Suit suit_in) : rank(rank_in), suit(suit_in) {}
+
+//get_rank() 
+Rank Card::get_rank() const{
+  return rank;
+}
+
+//get_suit() 
+Suit Card::get_suit() const{
+  return suit;
+}
+
+//et_suit(Suit trump) 
+Suit Card::get_suit(Suit trump) const{
+  if(suit == trump || ((rank == JACK)&&(Suit_next(trump))) || suit == Suit_next(Suit_next(trump))){
+    return trump;
+  }
+  else{
+    return suit;
+  }
+}
+
+//is_face_or_ace() 
+ bool Card::is_face_or_ace() const {
+  if(suit == JACK || suit == QUEEN || suit == KING || suit == ACE){
+    return true;
+  } else{
+    return false;
+  }
+ }
+
+//is_right_bower(Suit trump) 
+bool Card::is_right_bower(Suit trump) const{
+  if(suit == trump && rank == JACK){
+    return true;
+  } else{
+    return false;
+  }
+}
+
+//is_left_bower(Suit trump) 
+bool Card::is_left_bower(Suit trump) const{
+  if(suit == Suit_next(trump) && rank == JACK){
+    return true;
+  } else{
+    return false;
+  }
+}
+
+//is_trump(Suit trump) 
+bool Card::is_trump(Suit trump) const{
+  if(suit == trump){
+    return true;
+  } else{
+    return false;
+  }
+}
+
+//std::ostream & operator<<(std::ostream &os, const Card &card)
+std::ostream & operator<<(std::ostream &os, const Card &card)
+
+//std::istream & operator>>(std::istream &is, Card &card)
+
+//bool operator<(const Card &lhs, const Card &rhs)
+
+//bool operator<=(const Card &lhs, const Card &rhs)
+
+//bool operator>(const Card &lhs, const Card &rhs)
+
+//bool operator>=(const Card &lhs, const Card &rhs)
+
+//bool operator==(const Card &lhs, const Card &rhs)
+
+//bool operator!=(const Card &lhs, const Card &rhs)
 
 
 // NOTE: We HIGHLY recommend you check out the operator overloading
