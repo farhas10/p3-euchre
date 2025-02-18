@@ -155,22 +155,55 @@ bool Card::is_trump(Suit trump) const{
 }
 
 //std::ostream & operator<<(std::ostream &os, const Card &card)
-std::ostream & operator<<(std::ostream &os, const Card &card)
+std::ostream & operator<<(std::ostream &os, const Card &card){
+  os << card.get_rank() << " of " << card.get_suit();
+  return os;
+}
 
 //std::istream & operator>>(std::istream &is, Card &card)
+std::istream & operator>>(std::istream &is, Card &card){
+  std::string rank_str, of_str, suit_str;
+  is >> rank_str >> of_str >> suit_str;
+  
+  if (of_str != "of") {
+        is.setstate(std::ios::failbit); // Mark input as failed if "of" is missing
+        return is;
+  }
+  card.rank = string_to_rank(rank_str); 
+  card.suit = string_to_suit(suit_str);
+  
+  return is;
+}
 
 //bool operator<(const Card &lhs, const Card &rhs)
+bool operator<(const Card &lhs, const Card &rhs){
+  return (lhs.get_rank() < rhs.get_rank());
+}
 
 //bool operator<=(const Card &lhs, const Card &rhs)
+bool operator<=(const Card &lhs, const Card &rhs){
+  return (lhs.get_rank() <= rhs.get_rank());
+}
 
 //bool operator>(const Card &lhs, const Card &rhs)
+bool operator>(const Card &lhs, const Card &rhs){
+  return (lhs.get_rank() > rhs.get_rank());
+}
 
 //bool operator>=(const Card &lhs, const Card &rhs)
+bool operator>=(const Card &lhs, const Card &rhs){
+  return (lhs.get_rank() >= rhs.get_rank());
+}
 
 //bool operator==(const Card &lhs, const Card &rhs)
+bool operator==(const Card &lhs, const Card &rhs){
+  return (lhs.get_rank() == rhs.get_rank());
+}
 
 //bool operator!=(const Card &lhs, const Card &rhs)
-
+bool operator!=(const Card &lhs, const Card &rhs){
+  return (lhs.get_rank() != rhs.get_rank());
+}
 
 // NOTE: We HIGHLY recommend you check out the operator overloading
 // tutorial in the project spec before implementing
