@@ -120,7 +120,7 @@ Suit Card::get_suit(Suit trump) const{
 
 //is_face_or_ace() 
  bool Card::is_face_or_ace() const {
-  if(suit == JACK || suit == QUEEN || suit == KING || suit == ACE){
+  if(rank == JACK || rank == QUEEN || rank == KING || rank == ACE){
     return true;
   } else{
     return false;
@@ -155,21 +155,98 @@ bool Card::is_trump(Suit trump) const{
 }
 
 //std::ostream & operator<<(std::ostream &os, const Card &card)
-std::ostream & operator<<(std::ostream &os, const Card &card)
+std::ostream & operator<<(std::ostream &os, const Card &card){
+  os << card.get_rank() << " of " << card.get_suit();
+  return os;
+}
 
 //std::istream & operator>>(std::istream &is, Card &card)
+std::istream & operator>>(std::istream &is, Card &card){
+  Rank rank;
+  Suit suit;
+  if(is >> rank >> suit){
+    card = Card(rank, suit);
+  }
+  return is;
+}
 
 //bool operator<(const Card &lhs, const Card &rhs)
+bool operator<(const Card &lhs, const Card &rhs){
+  if(lhs.get_rank() < rhs.get_rank()){
+    return true;
+  } else if(lhs.get_rank() == rhs.get_rank()){
+    if(lhs.get_suit() < rhs.get_suit()){
+      return true;
+    } else{
+      return false;
+    }
+  } else{
+    return false;
+  }
+}
 
 //bool operator<=(const Card &lhs, const Card &rhs)
+bool operator<=(const Card &lhs, const Card &rhs){
+  if(lhs.get_rank() < rhs.get_rank()){
+    return true;
+  } else if(lhs.get_rank() == rhs.get_rank()){
+    if(lhs.get_suit() <= rhs.get_suit()){
+      return true;
+    } else{
+      return false;
+    }
+  } else{
+    return false;
+  }
+}
 
 //bool operator>(const Card &lhs, const Card &rhs)
+bool operator>(const Card &lhs, const Card &rhs){
+  if(lhs.get_rank() > rhs.get_rank()){
+    return true;
+  } else if(lhs.get_rank() == rhs.get_rank()){
+    if(lhs.get_suit() > rhs.get_suit()){
+      return true;
+    } else{
+      return false;
+    }
+  } else{
+    return false;
+  }
+}
 
 //bool operator>=(const Card &lhs, const Card &rhs)
+bool operator>=(const Card &lhs, const Card &rhs){
+  if(lhs.get_rank() > rhs.get_rank()){
+    return true;
+  } else if(lhs.get_rank() == rhs.get_rank()){
+    if(lhs.get_suit() >= rhs.get_suit()){
+      return true;
+    } else{
+      return false;
+    }
+  } else{
+    return false;
+  }
+}
 
 //bool operator==(const Card &lhs, const Card &rhs)
+bool operator==(const Card &lhs, const Card &rhs){
+  if(lhs.get_rank() == rhs.get_rank() && lhs.get_suit() == rhs.get_suit()){
+    return true;
+  } else{
+    return false;
+  }
+}
 
 //bool operator!=(const Card &lhs, const Card &rhs)
+bool operator!=(const Card &lhs, const Card &rhs){
+  if(lhs.get_rank() != rhs.get_rank() || lhs.get_suit() != rhs.get_suit()){
+    return true;
+  } else{
+    return false;
+  }
+}
 
 
 // NOTE: We HIGHLY recommend you check out the operator overloading
@@ -183,3 +260,47 @@ std::ostream & operator<<(std::ostream &os, const Card &card)
 //   operator>=
 //   operator==
 //   operator!=
+
+bool Card_less(const Card &a, const Card &b, const Card &led_card, Suit trump){
+  if(a.get_suit(trump) == b.get_suit(trump)){
+    if(a.get_rank() < b.get_rank()){
+      return true;
+    } else{
+      return false;
+    }
+  } else if(a.get_suit(trump) == led_card.get_suit(trump)){
+    return false;
+  } else if(b.get_suit(trump) == led_card.get_suit(trump)){
+    return true;
+  } else{
+    return false;
+  }
+}
+
+bool Card_less(const Card &a, const Card &b, Suit trump){
+  if(a.get_suit(trump) == b.get_suit(trump)){
+    if(a.get_rank() < b.get_rank()){
+      return true;
+    } else{
+      return false;
+    }
+  } else if(a.get_suit(trump) == trump){
+    return true;
+  } else if(b.get_suit(trump) == trump){
+    return false;
+  } else{
+    return false;
+  }
+}
+
+Suit Suit_next(Suit suit){
+  if(suit == SPADES){
+    return CLUBS;
+  } else if(suit == CLUBS){
+    return SPADES;
+  } else if(suit == HEARTS){
+    return DIAMONDS;
+  } else{
+    return HEARTS;
+  }
+}
