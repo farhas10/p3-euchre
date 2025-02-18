@@ -162,90 +162,47 @@ std::ostream & operator<<(std::ostream &os, const Card &card){
 
 //std::istream & operator>>(std::istream &is, Card &card)
 std::istream & operator>>(std::istream &is, Card &card){
-  Rank rank;
-  Suit suit;
-  if(is >> rank >> suit){
-    card = Card(rank, suit);
+  std::string rank_str, of_str, suit_str;
+  is >> rank_str >> of_str >> suit_str;
+
+  if (of_str != "of") {
+    is.setstate(std::ios::failbit); 
+    return is;
   }
+  card.rank = string_to_rank(rank_str); 
+  card.suit = string_to_suit(suit_str); 
+
   return is;
 }
 
 //bool operator<(const Card &lhs, const Card &rhs)
 bool operator<(const Card &lhs, const Card &rhs){
-  if(lhs.get_rank() < rhs.get_rank()){
-    return true;
-  } else if(lhs.get_rank() == rhs.get_rank()){
-    if(lhs.get_suit() < rhs.get_suit()){
-      return true;
-    } else{
-      return false;
-    }
-  } else{
-    return false;
-  }
+  return (lhs.get_rank() < rhs.get_rank());
 }
 
 //bool operator<=(const Card &lhs, const Card &rhs)
 bool operator<=(const Card &lhs, const Card &rhs){
-  if(lhs.get_rank() < rhs.get_rank()){
-    return true;
-  } else if(lhs.get_rank() == rhs.get_rank()){
-    if(lhs.get_suit() <= rhs.get_suit()){
-      return true;
-    } else{
-      return false;
-    }
-  } else{
-    return false;
-  }
+  return (lhs.get_rank() <= rhs.get_rank());
 }
 
 //bool operator>(const Card &lhs, const Card &rhs)
 bool operator>(const Card &lhs, const Card &rhs){
-  if(lhs.get_rank() > rhs.get_rank()){
-    return true;
-  } else if(lhs.get_rank() == rhs.get_rank()){
-    if(lhs.get_suit() > rhs.get_suit()){
-      return true;
-    } else{
-      return false;
-    }
-  } else{
-    return false;
-  }
+  return (lhs.get_rank() > rhs.get_rank());
 }
 
 //bool operator>=(const Card &lhs, const Card &rhs)
 bool operator>=(const Card &lhs, const Card &rhs){
-  if(lhs.get_rank() > rhs.get_rank()){
-    return true;
-  } else if(lhs.get_rank() == rhs.get_rank()){
-    if(lhs.get_suit() >= rhs.get_suit()){
-      return true;
-    } else{
-      return false;
-    }
-  } else{
-    return false;
-  }
+  return (lhs.get_rank() >= rhs.get_rank());
 }
 
 //bool operator==(const Card &lhs, const Card &rhs)
 bool operator==(const Card &lhs, const Card &rhs){
-  if(lhs.get_rank() == rhs.get_rank() && lhs.get_suit() == rhs.get_suit()){
-    return true;
-  } else{
-    return false;
-  }
+  return (lhs.get_rank() == rhs.get_rank());
 }
 
 //bool operator!=(const Card &lhs, const Card &rhs)
 bool operator!=(const Card &lhs, const Card &rhs){
-  if(lhs.get_rank() != rhs.get_rank() || lhs.get_suit() != rhs.get_suit()){
-    return true;
-  } else{
-    return false;
-  }
+  return (lhs.get_rank() != rhs.get_rank());
 }
 
 
