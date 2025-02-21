@@ -28,6 +28,12 @@ TEST(invalid_rank_input){
     input >> c;
     ASSERT_FALSE(input.fail());
 }
+TEST(invalid_suit_input) {
+    istringstream input("Four of Stars"); 
+    Card c;
+    input >> c;
+    ASSERT_FALSE(input.fail()); 
+}
 TEST(trump){
     Card c(JACK, SPADES);
     ASSERT_FALSE(c.is_trump(CLUBS)); //if trump is clubs
@@ -82,6 +88,26 @@ TEST(test_card_input_output){
     
     ASSERT_EQUAL("Two of Clubs", output.str());
 }
+TEST(card_less_normal) {
+    Card c1(JACK, HEARTS);  
+    Card c2(NINE, HEARTS);  
 
+    ASSERT_TRUE(Card_less(c2, c1, HEARTS));  
+}
+TEST(card_less_right_left) {
+    Card right(JACK, SPADES);  
+    Card left(JACK, CLUBS);  
+
+    ASSERT_TRUE(Card_less(left, right, SPADES));  
+    ASSERT_FALSE(Card_less(right, left, SPADES));
+}
+TEST(card_less_case){
+    Card left(JACK, CLUBS);
+    Card c(TWO, SPADES);
+    ASSERT_TRUE(Card_less(c, left, SPADES));
+}
+TEST(test_suit_next){
+    ASSERT_EQUAL(SPADES, Suit_next(CLUBS));
+}
 
 TEST_MAIN()

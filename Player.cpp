@@ -115,31 +115,32 @@ void Simple::add_and_discard(const Card &upcard) {
 
 Card Simple::lead_card(Suit trump) {
     // Find highest non-trump card
-    Card highest_card = hand.front();
     size_t highest_index = 0;
+    bool found_non_trump = false;
     
     // First try to find the highest non-trump card
     for (size_t i = 0; i < hand.size(); ++i) {
-        if (!hand[i].is_trump(trump) && 
-            (highest_card.is_trump(trump) || hand[i] > highest_card)) {
-            highest_card = hand[i];
-            highest_index = i;
+        if (!hand[i].is_trump(trump) && !hand[i].is_left_bower(trump)) {
+            if (!found_non_trump || hand[i] > hand[highest_index]) {
+                highest_index = i;
+                found_non_trump = true;
+            }
         }
     }
     
-    // If we only have trump cards, play the highest trump
-    if (highest_card.is_trump(trump)) {
+    // If we only have trump cards, find the highest trump
+    if (!found_non_trump) {
         for (size_t i = 0; i < hand.size(); ++i) {
-            if (hand[i].get_suit(trump) == trump && hand[i] > highest_card) {
-                highest_card = hand[i];
+            if (i == 0 || Card_less(hand[highest_index], hand[i], trump)) {
                 highest_index = i;
             }
         }
     }
     
     // Remove and return the selected card
+    Card card_to_play = hand[highest_index];
     hand.erase(hand.begin() + highest_index);
-    return highest_card;
+    return card_to_play;
 }
 
 Card Simple::play_card(const Card &led_card, Suit trump) {
