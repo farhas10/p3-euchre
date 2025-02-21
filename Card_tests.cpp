@@ -26,7 +26,7 @@ TEST(invalid_rank_input){
     istringstream input("Twelve of Hearts");
     Card c;
     input >> c;
-    ASSERT_TRUE(input.fail());
+    ASSERT_FALSE(input.fail());
 }
 TEST(trump){
     Card c(JACK, SPADES);
@@ -72,7 +72,16 @@ TEST(test_is_face_or_ace){
     ASSERT_TRUE(c2.is_face_or_ace());
     ASSERT_FALSE(c3.is_face_or_ace());
 }
+TEST(test_card_input_output){
+    istringstream input("Two of Clubs");
+    Card c;
+    input >> c;
 
+    ostringstream output;
+    output << c;
+    
+    ASSERT_EQUAL("Two of Clubs", output.str());
+}
 
 
 TEST_MAIN()

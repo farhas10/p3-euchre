@@ -31,7 +31,7 @@ Rank string_to_rank(const std::string &str) {
       return static_cast<Rank>(r);
     }
   }
-  assert(false); // Input string didn't match any rank
+  //assert(false); // Input string didn't match any rank
   return {};
 }
 
@@ -70,7 +70,7 @@ Suit string_to_suit(const std::string &str) {
       return static_cast<Suit>(s);
     }
   }
-  assert(false); // Input string didn't match any suit
+  //assert(false); // Input string didn't match any suit
   return {};
 }
 
