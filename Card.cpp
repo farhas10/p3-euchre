@@ -177,7 +177,9 @@ std::istream & operator>>(std::istream &is, Card &card){
 
 //bool operator<(const Card &lhs, const Card &rhs)
 bool operator<(const Card &lhs, const Card &rhs){
-  return (lhs.get_rank() < rhs.get_rank());
+    // This is a basic comparison that should be updated to use Card_less
+    // For now, just compare ranks as it's only used for basic sorting
+    return (lhs.get_rank() < rhs.get_rank());
 }
 
 //bool operator<=(const Card &lhs, const Card &rhs)
@@ -218,35 +220,23 @@ bool operator!=(const Card &lhs, const Card &rhs){
 //   operator!=
 
 bool Card_less(const Card &a, const Card &b, const Card &led_card, Suit trump){
-  // Handle bower cases first
-    if (a.is_right_bower(trump)) return false;
-    if (b.is_right_bower(trump)) return true;
-    if (a.is_left_bower(trump)) return false;
-    if (b.is_left_bower(trump)) return true;
-
-    // Then handle trump vs non-trump
-    if (a.get_suit(trump) == trump && b.get_suit(trump) != trump) return false;
-    if (a.get_suit(trump) != trump && b.get_suit(trump) == trump) return true;
-
-    // If both are trump or both are not trump, compare ranks
-    if (a.get_suit(trump) == b.get_suit(trump)) {
-        return a.get_rank() < b.get_rank();
+  if(a.get_suit(trump) == b.get_suit(trump)){
+    if(a.get_rank() < b.get_rank()){
+      return true;
+    } else{
+      return false;
     }
-
-    // If one of the cards follows the led suit but neither is trump
-    if (a.get_suit(trump) == led_card.get_suit(trump) && b.get_suit(trump) != led_card.get_suit(trump)) {
-        return false;
-    }
-    if (b.get_suit(trump) == led_card.get_suit(trump) && a.get_suit(trump) != led_card.get_suit(trump)) {
-        return true;
-    }
-
-    // In any other case, a is not less than b
+  } else if(a.get_suit(trump) == led_card.get_suit(trump)){
     return false;
+  } else if(b.get_suit(trump) == led_card.get_suit(trump)){
+    return true;
+  } else{
+    return false;
+  }
 }
 
 bool Card_less(const Card &a, const Card &b, Suit trump){
-  // Handle bower cases first
+    // Handle bower cases first
     if (a.is_right_bower(trump)) return false;
     if (b.is_right_bower(trump)) return true;
     if (a.is_left_bower(trump)) return false;
