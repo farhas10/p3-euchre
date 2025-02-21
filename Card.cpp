@@ -1,3 +1,119 @@
+#include "Card.hpp"
+#include "unit_test_framework.hpp"
+#include <iostream>
+
+using namespace std;
+
+
+TEST(test_card_ctor) {
+    Card c(ACE, HEARTS);
+    ASSERT_EQUAL(ACE, c.get_rank());
+    ASSERT_EQUAL(HEARTS, c.get_suit());
+}
+// Add more test cases here
+TEST(test_default){
+    Card c;
+    ASSERT_EQUAL(TWO, c.get_rank());
+    ASSERT_EQUAL(SPADES, c.get_suit());
+}
+TEST(invalid_input){
+    istringstream input("Five Clubs");
+    Card c;
+    input >> c;
+    ASSERT_TRUE(input.fail());
+}
+TEST(invalid_rank_input){
+    istringstream input("Twelve of Hearts");
+    Card c;
+    input >> c;
+    ASSERT_FALSE(input.fail());
+}
+TEST(invalid_suit_input) {
+    istringstream input("Four of Stars"); 
+    Card c;
+    input >> c;
+    ASSERT_FALSE(input.fail()); 
+}
+TEST(trump){
+    Card c(JACK, SPADES);
+    ASSERT_FALSE(c.is_trump(CLUBS)); //if trump is clubs
+    ASSERT_TRUE(c.is_trump(SPADES)); //if trump is spades
+}
+//spades & clubs are black
+//diamonds & hearts are red
+TEST(right_bower){
+    Card c(JACK, DIAMONDS);
+    ASSERT_TRUE(c.is_right_bower(DIAMONDS));
+    ASSERT_FALSE(c.is_right_bower(CLUBS));
+}
+TEST(left_bower){
+    Card c(JACK, DIAMONDS);
+    ASSERT_TRUE(c.is_left_bower(HEARTS));
+    ASSERT_FALSE(c.is_left_bower(DIAMONDS));
+}
+TEST(greater_than_operator){
+    Card c1(ACE, HEARTS);
+    Card c2(KING, HEARTS);
+    ASSERT_TRUE(c1 > c2);
+    ASSERT_TRUE(c1 >= c2);
+}
+TEST(less_than_operator){
+    Card c1(ACE, HEARTS);
+    Card c2(KING, HEARTS);
+    ASSERT_TRUE(c2 < c1);
+    ASSERT_TRUE(c2 <= c1);
+}
+TEST(equal_operator){
+    Card c1(ACE, HEARTS);
+    Card c2(KING, HEARTS);
+    ASSERT_FALSE(c1 == c2);
+    ASSERT_TRUE(c1 != c2);
+}
+TEST(test_is_face_or_ace){
+    Card c1(ACE, SPADES); //ace card
+    Card c2(KING, SPADES); //fae card
+    Card c3(TEN, SPADES); //neither
+
+    ASSERT_TRUE(c1.is_face_or_ace());
+    ASSERT_TRUE(c2.is_face_or_ace());
+    ASSERT_FALSE(c3.is_face_or_ace());
+}
+TEST(test_card_input_output){
+    istringstream input("Two of Clubs");
+    Card c;
+    input >> c;
+
+    ostringstream output;
+    output << c;
+    
+    ASSERT_EQUAL("Two of Clubs", output.str());
+}
+TEST(card_less_normal) {
+    Card c1(JACK, HEARTS);  
+    Card c2(NINE, HEARTS);  
+
+    ASSERT_TRUE(Card_less(c2, c1, HEARTS));  
+}
+TEST(card_less_right_left) {
+    Card right(JACK, SPADES);  
+    Card left(JACK, CLUBS);  
+
+    ASSERT_TRUE(Card_less(left, right, SPADES));  
+    ASSERT_FALSE(Card_less(right, left, SPADES));
+}
+TEST(card_less_case){
+    Card left(JACK, CLUBS);
+    Card c(TWO, SPADES);
+    ASSERT_TRUE(Card_less(c, left, SPADES));
+}
+TEST(test_suit_next){
+    ASSERT_EQUAL(SPADES, Suit_next(CLUBS));
+}
+
+TEST_MAIN()
+
+
+
 #include <cassert>
 #include <iostream>
 #include <array>
@@ -177,9 +293,7 @@ std::istream & operator>>(std::istream &is, Card &card){
 
 //bool operator<(const Card &lhs, const Card &rhs)
 bool operator<(const Card &lhs, const Card &rhs){
-    // This is a basic comparison that should be updated to use Card_less
-    // For now, just compare ranks as it's only used for basic sorting
-    return (lhs.get_rank() < rhs.get_rank());
+  return (lhs.get_rank() < rhs.get_rank());
 }
 
 //bool operator<=(const Card &lhs, const Card &rhs)
@@ -220,23 +334,35 @@ bool operator!=(const Card &lhs, const Card &rhs){
 //   operator!=
 
 bool Card_less(const Card &a, const Card &b, const Card &led_card, Suit trump){
-  if(a.get_suit(trump) == b.get_suit(trump)){
-    if(a.get_rank() < b.get_rank()){
-      return true;
-    } else{
-      return false;
+  // Handle bower cases first
+    if (a.is_right_bower(trump)) return false;
+    if (b.is_right_bower(trump)) return true;
+    if (a.is_left_bower(trump)) return false;
+    if (b.is_left_bower(trump)) return true;
+
+    // Then handle trump vs non-trump
+    if (a.get_suit(trump) == trump && b.get_suit(trump) != trump) return false;
+    if (a.get_suit(trump) != trump && b.get_suit(trump) == trump) return true;
+
+    // If both are trump or both are not trump, compare ranks
+    if (a.get_suit(trump) == b.get_suit(trump)) {
+        return a.get_rank() < b.get_rank();
     }
-  } else if(a.get_suit(trump) == led_card.get_suit(trump)){
+
+    // If one of the cards follows the led suit but neither is trump
+    if (a.get_suit(trump) == led_card.get_suit(trump) && b.get_suit(trump) != led_card.get_suit(trump)) {
+        return false;
+    }
+    if (b.get_suit(trump) == led_card.get_suit(trump) && a.get_suit(trump) != led_card.get_suit(trump)) {
+        return true;
+    }
+
+    // In any other case, a is not less than b
     return false;
-  } else if(b.get_suit(trump) == led_card.get_suit(trump)){
-    return true;
-  } else{
-    return false;
-  }
 }
 
 bool Card_less(const Card &a, const Card &b, Suit trump){
-    // Handle bower cases first
+  // Handle bower cases first
     if (a.is_right_bower(trump)) return false;
     if (b.is_right_bower(trump)) return true;
     if (a.is_left_bower(trump)) return false;
