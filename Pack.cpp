@@ -12,10 +12,11 @@ using namespace std;
   // NOTE: The standard order is the same as that in pack.in.
   // NOTE: Do NOT use pack.in in your implementation of this function
   // NOTE: The pack is initially full, with no cards dealt.
-Pack(){
+Pack::Pack() {
     int i = 0;
-    for (int suit = 0; suit < 3; suit++){
-        for (int rank = 0; rank < 14; rank++){
+    // Initialize cards from NINE to ACE for each suit
+    for (int suit = SPADES; suit <= DIAMONDS; suit++) {
+        for (int rank = NINE; rank <= ACE; rank++) {
             cards[i] = Card(static_cast<Rank>(rank), static_cast<Suit>(suit));
             i++;
         }
@@ -23,31 +24,43 @@ Pack(){
     reset();
 }
 
-void reset(){
-  next = 0;
-}
-
-/*
-void shuffle(){
-    array<Card, PACK_SIZE> temp;
+Pack::Pack(istream& pack_input) {
     int i = 0;
-    for (int j = 0; j < PACK_SIZE/2; j++){
-        temp[i] = cards[j];
-        i += 2;
-    }
-    i = 1;
-    for (int j = PACK_SIZE/2; j < PACK_SIZE; j++){
-        temp[i] = cards[j];
-        i += 2;
-    }
-    for (int i = 0; i < PACK_SIZE; i++){
-        cards[i] = temp[i];
+    while (pack_input >> cards[i]) {
+        i++;
     }
     reset();
 }
-    */
 
-bool empty() const{
-    return next == PACK_SIZE;
+Card Pack::deal_one() {
+    assert(!empty());  // REQUIRES: cards remain in the Pack
+    return cards[next++];
+}
+
+void Pack::reset() {
+    next = 0;
+}
+
+// EFFECTS: Shuffles the Pack and resets the next index. This
+  //          performs an in shuffle seven times. See
+  //          https://en.wikipedia.org/wiki/In_shuffle.
+void Pack::shuffle() {
+    for (int shuffle_count = 0; shuffle_count < 7; shuffle_count++) {
+        std::array<Card, PACK_SIZE> temp = cards;
+        
+        // Perform in-shuffle: split deck in half and interleave
+        int mid = PACK_SIZE / 2;
+        for (int i = 0; i < mid; i++) {
+            // Second half cards go at even indices
+            cards[2 * i] = temp[mid + i];
+            // First half cards go at odd indices
+            cards[2 * i + 1] = temp[i];
+        }
+    }
+    reset();
+}
+
+bool Pack::empty() const {
+    return next >= PACK_SIZE;
 }
     
