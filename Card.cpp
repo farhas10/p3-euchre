@@ -205,7 +205,6 @@ bool operator!=(const Card &lhs, const Card &rhs){
   return (lhs.get_rank() != rhs.get_rank());
 }
 
-
 // NOTE: We HIGHLY recommend you check out the operator overloading
 // tutorial in the project spec before implementing
 // the following operator overload functions:
