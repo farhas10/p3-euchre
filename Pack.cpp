@@ -33,7 +33,7 @@ Pack::Pack(istream& pack_input) {
 }
 
 Card Pack::deal_one() {
-    assert(!empty());  // REQUIRES: cards remain in the Pack
+    assert(!empty());  // REQUIRES: cards remain in the Pack 
     return cards[next++];
 }
 
@@ -48,16 +48,15 @@ void Pack::shuffle() {
     for (int shuffle_count = 0; shuffle_count < 7; shuffle_count++) {
         std::array<Card, PACK_SIZE> temp = cards;
         
-        // Perform in-shuffle: split deck in half and interleave
+        // For a perfect in-shuffle:
+        // - Second half cards (13-24) go to even positions (0,2,4...)
+        // - First half cards (1-12) go to odd positions (1,3,5...)
         int mid = PACK_SIZE / 2;
-        for (int i = 0; i < PACK_SIZE; i++) {
-            if (i % 2 == 0) {
-                // Even positions get cards from second half
-                cards[i] = temp[mid + (i/2)];
-            } else {
-                // Odd positions get cards from first half
-                cards[i] = temp[i/2];
-            }
+        for (int i = 0; i < mid; i++) {
+            // Cards from second half (index mid+i) go to even positions (2*i)
+            cards[2 * i] = temp[mid + i];
+            // Cards from first half (index i) go to odd positions (2*i + 1)
+            cards[2 * i + 1] = temp[i];
         }
     }
     reset();
