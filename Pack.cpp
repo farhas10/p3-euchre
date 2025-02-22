@@ -50,11 +50,14 @@ void Pack::shuffle() {
         
         // Perform in-shuffle: split deck in half and interleave
         int mid = PACK_SIZE / 2;
-        for (int i = 0; i < mid; i++) {
-            // Second half cards go at even indices
-            cards[2 * i] = temp[mid + i];
-            // First half cards go at odd indices
-            cards[2 * i + 1] = temp[i];
+        for (int i = 0; i < PACK_SIZE; i++) {
+            if (i % 2 == 0) {
+                // Even positions get cards from second half
+                cards[i] = temp[mid + (i/2)];
+            } else {
+                // Odd positions get cards from first half
+                cards[i] = temp[i/2];
+            }
         }
     }
     reset();
