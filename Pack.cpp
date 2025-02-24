@@ -25,9 +25,12 @@ Pack::Pack() {
 }
 
 Pack::Pack(istream& pack_input) {
-    int i = 0;
-    while (pack_input >> cards[i]) {
-        i++;
+    string rank;
+    string suit;
+    string extra;
+    for (int i = 0; i < PACK_SIZE; ++i) {
+        pack_input >> rank >> extra >> suit;
+        cards[i] = Card(string_to_rank(rank), string_to_suit(suit));
     }
     reset();
 }

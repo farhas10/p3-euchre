@@ -312,4 +312,97 @@ TEST(test_lead_card_both_bowers) {
     delete p;
 }
 
+// Test lead card with all trump when no suit
+TEST(test_simple_player_lead_trump_when_no_suit) {
+    Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(JACK, SPADES));
+    p->add_card(Card(KING, SPADES));
+    p->add_card(Card(QUEEN, SPADES));
+    p->add_card(Card(TEN, SPADES));
+    p->add_card(Card(ACE, SPADES));
+        
+    ASSERT_EQUAL(p->lead_card(SPADES), Card(JACK, SPADES));
+    
+    delete p;
+}
+
+// Test make trump with varying hand sizes
+TEST(test_simple_player_make_trump_first_round_varying_hands) {
+    // Two cards
+    Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(ACE, SPADES));
+    p->add_card(Card(KING, SPADES));
+    
+    Card upcard(NINE, SPADES);
+    Suit trump;
+    bool orderup = p->make_trump(upcard, true, 1, trump);
+    
+    ASSERT_TRUE(orderup);
+    ASSERT_EQUAL(trump, SPADES);
+    delete p;
+
+    // One card
+    p = Player_factory("Test", "Simple");
+    p->add_card(Card(ACE, SPADES));
+    
+    orderup = p->make_trump(upcard, true, 1, trump);
+    
+    ASSERT_FALSE(orderup);
+    delete p;
+}
+
+// Test make trump second round with exactly one trump
+TEST(test_simple_player_make_trump_second_round_two_cards) {
+    Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(NINE, CLUBS));
+    p->add_card(Card(JACK, CLUBS));
+    
+    Card upcard(NINE, SPADES);
+    Suit trump;
+    bool orderup = p->make_trump(upcard, false, 2, trump);
+    
+    ASSERT_TRUE(orderup);
+    ASSERT_EQUAL(trump, CLUBS);
+    delete p;
+}
+
+// Test make trump round 1 with two face cards in upcard suit
+TEST(test_make_trump_round1_faces) {
+    Player* p = Player_factory("Ronald", "Simple");
+    p->add_card(Card(QUEEN, HEARTS));
+    p->add_card(Card(JACK, DIAMONDS));
+    p->add_card(Card(NINE, HEARTS));
+    
+    Suit trump = DIAMONDS;
+    ASSERT_TRUE(p->make_trump(Card(KING, HEARTS), false, 1, trump));
+    ASSERT_EQUAL(HEARTS, trump);
+    delete p;
+}
+
+// Test dealer passing in round 1 with weak hand
+TEST(test_make_trump_round1_pass) {
+    Player* p = Player_factory("Ronald", "Simple");
+    p->add_card(Card(NINE, SPADES));
+    p->add_card(Card(TEN, SPADES));
+    p->add_card(Card(JACK, DIAMONDS));
+    
+    Suit trump = HEARTS;
+    ASSERT_FALSE(p->make_trump(Card(KING, HEARTS), true, 1, trump));
+    ASSERT_EQUAL(HEARTS, trump);
+    delete p;
+}
+
+// Test dealer making trump in round 2 with left bower
+TEST(test_make_trump_round2_screw) {
+    Player* p = Player_factory("Bobert", "Simple");
+    p->add_card(Card(NINE, SPADES));
+    p->add_card(Card(TEN, SPADES));
+    p->add_card(Card(JACK, DIAMONDS));
+    
+    Suit trump = HEARTS;
+    ASSERT_TRUE(p->make_trump(Card(KING, HEARTS), true, 2, trump));
+    ASSERT_EQUAL(DIAMONDS, trump);
+    delete p;
+}
+
 TEST_MAIN()
