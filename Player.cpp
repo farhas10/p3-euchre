@@ -73,6 +73,11 @@ void Simple::add_card(const Card &c) {
 
 bool Simple::make_trump(const Card &upcard, bool is_dealer,
                        int round, Suit &order_up_suit) const {
+    // If hand is empty, never order up
+    if (hand.empty()) {
+        return false;
+    }
+    
     // Count number of face cards or aces in the same suit as upcard
     int trump_face_cards = 0;
     
@@ -109,8 +114,23 @@ bool Simple::make_trump(const Card &upcard, bool is_dealer,
 }
 
 void Simple::add_and_discard(const Card &upcard) {
+    // Add the upcard first
     hand.push_back(upcard);
-    // Basic implementation - can be expanded later
+    
+    // Find the lowest card to discard
+    size_t discard_index = 0;
+    Suit trump = upcard.get_suit();  // The upcard's suit is trump
+    
+    // Compare each card with the current lowest
+    for (size_t i = 1; i < hand.size(); ++i) {
+        // If current card is lower than our lowest so far, update discard_index
+        if (Card_less(hand[i], hand[discard_index], trump)) {
+            discard_index = i;
+        }
+    }
+    
+    // Remove the lowest card
+    hand.erase(hand.begin() + discard_index);
 }
 
 Card Simple::lead_card(Suit trump) {
@@ -120,7 +140,7 @@ Card Simple::lead_card(Suit trump) {
     
     // First try to find the highest non-trump card
     for (size_t i = 0; i < hand.size(); ++i) {
-        if (!hand[i].is_trump(trump) && !hand[i].is_left_bower(trump)) {
+        if (!hand[i].is_trump(trump)) {
             if (!found_non_trump || hand[i] > hand[highest_index]) {
                 highest_index = i;
                 found_non_trump = true;
@@ -130,8 +150,8 @@ Card Simple::lead_card(Suit trump) {
     
     // If we only have trump cards, find the highest trump
     if (!found_non_trump) {
-        for (size_t i = 0; i < hand.size(); ++i) {
-            if (i == 0 || Card_less(hand[highest_index], hand[i], trump)) {
+        for (size_t i = 1; i < hand.size(); ++i) {
+            if (!Card_less(hand[i], hand[highest_index], trump)) {
                 highest_index = i;
             }
         }

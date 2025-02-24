@@ -81,33 +81,27 @@ TEST(test_pack_deal_all) {
     ASSERT_TRUE(pack.empty());  // Pack should be empty after dealing all cards
 }
 
-// Test multiple shuffles produce different results
+// Test that shuffle changes the order of cards
 TEST(test_pack_multiple_shuffles) {
     Pack pack1;
     Pack pack2;
     
-    // Shuffle each pack multiple times
-    pack1.shuffle();
-    pack1.shuffle();
-    pack1.shuffle();
-    
-    pack2.shuffle();
-    pack2.shuffle();
+    // Keep pack1 in original order, shuffle pack2 once
     pack2.shuffle();
     
-    bool all_same = true;
-    for (int i = 0; i < 24; ++i) {
+    bool found_difference = false;
+    while (!pack1.empty() && !pack2.empty()) {
         Card card1 = pack1.deal_one();
         Card card2 = pack2.deal_one();
         if (card1.get_rank() != card2.get_rank() || 
             card1.get_suit() != card2.get_suit()) {
-            all_same = false;
+            found_difference = true;
             break;
         }
     }
     
-    // Two different sequences of shuffles should (very likely) produce different orders
-    ASSERT_FALSE(all_same);
+    // Shuffled pack should be in different order than original
+    ASSERT_TRUE(found_difference);
 }
 
 // Add this test to verify reset works after emptying

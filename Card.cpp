@@ -108,9 +108,9 @@ Suit Card::get_suit() const{
   return suit;
 }
 
-//et_suit(Suit trump) 
+//get_suit(Suit trump) 
 Suit Card::get_suit(Suit trump) const{
-  if(suit == trump || ((rank == JACK)&&(Suit_next(trump))) || suit == Suit_next(Suit_next(trump))){
+  if(suit == trump || ((rank == JACK)&&(suit == Suit_next(trump)))){
     return trump;
   }
   else{
@@ -147,7 +147,7 @@ bool Card::is_left_bower(Suit trump) const{
 
 //is_trump(Suit trump) 
 bool Card::is_trump(Suit trump) const{
-  if(suit == trump){
+  if(suit == trump || is_left_bower(trump)){
     return true;
   } else{
     return false;
