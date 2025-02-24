@@ -380,7 +380,7 @@ TEST(test_make_trump_round1_faces) {
 }
 
 // Test dealer passing in round 1 with weak hand
-TEST(test_make_trump_round1_pass) {
+TEST(test_make_trump_round1_correct) {
     Player* p = Player_factory("p", "Simple");
     p->add_card(Card(NINE, SPADES));
     p->add_card(Card(TEN, SPADES));
