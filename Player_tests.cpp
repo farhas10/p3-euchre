@@ -7,11 +7,11 @@ using namespace std;
 
 // Basic factory and name tests
 TEST(test_player_creation) {
-    Player* p1 = Player_factory("Ryan", "Simple");
-    Player* p2 = Player_factory("Maria", "Human");
+    Player* p1 = Player_factory("p", "Simple");
+    Player* p2 = Player_factory("p", "Human");
     
-    ASSERT_EQUAL("Ryan", p1->get_name());
-    ASSERT_EQUAL("Maria", p2->get_name());
+    ASSERT_EQUAL("p", p1->get_name());
+    ASSERT_EQUAL("p", p2->get_name());
     
     delete p1;
     delete p2;
@@ -19,10 +19,10 @@ TEST(test_player_creation) {
 
 // Test string output operator
 TEST(test_player_output) {
-    Player* p = Player_factory("TestPlayer", "Simple");
+    Player* p = Player_factory("p", "Simple");
     ostringstream oss;
     oss << *p;
-    ASSERT_EQUAL("TestPlayer", oss.str());
+    ASSERT_EQUAL("p", oss.str());
     delete p;
 }
 
@@ -282,7 +282,7 @@ TEST(test_make_trump_round2_no_trump) {
 
 // Test make trump round 1 with left bower counting as trump
 TEST(test_simple_player_lead_card_left_right_bower1) {
-    Player * p = Player_factory("John", "Simple");
+    Player * p = Player_factory("p", "Simple");
     p->add_card(Card(JACK, CLUBS));
     p->add_card(Card(QUEEN, SPADES));
     p->add_card(Card(ACE, SPADES));
@@ -368,7 +368,7 @@ TEST(test_simple_player_make_trump_second_round_two_cards) {
 
 // Test make trump round 1 with two face cards in upcard suit
 TEST(test_make_trump_round1_faces) {
-    Player* p = Player_factory("Ronald", "Simple");
+    Player* p = Player_factory("p", "Simple");
     p->add_card(Card(QUEEN, HEARTS));
     p->add_card(Card(JACK, DIAMONDS));
     p->add_card(Card(NINE, HEARTS));
@@ -381,7 +381,7 @@ TEST(test_make_trump_round1_faces) {
 
 // Test dealer passing in round 1 with weak hand
 TEST(test_make_trump_round1_pass) {
-    Player* p = Player_factory("Ronald", "Simple");
+    Player* p = Player_factory("p", "Simple");
     p->add_card(Card(NINE, SPADES));
     p->add_card(Card(TEN, SPADES));
     p->add_card(Card(JACK, DIAMONDS));
@@ -393,8 +393,8 @@ TEST(test_make_trump_round1_pass) {
 }
 
 // Test dealer making trump in round 2 with left bower
-TEST(test_make_trump_round2_screw) {
-    Player* p = Player_factory("Bobert", "Simple");
+TEST(test_make_trump_round2_left) {
+    Player* p = Player_factory("p", "Simple");
     p->add_card(Card(NINE, SPADES));
     p->add_card(Card(TEN, SPADES));
     p->add_card(Card(JACK, DIAMONDS));
