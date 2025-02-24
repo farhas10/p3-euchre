@@ -479,9 +479,40 @@ TEST(test_add_discard_equal_cards) {
     delete p;
 }
 
-// ===============================
-// Miscellaneous Tests
-// ===============================
+TEST(test_add_discard_trump_consideration) {
+    Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(NINE, DIAMONDS));  // Non-trump
+    p->add_card(Card(TEN, DIAMONDS));   // Non-trump
+    p->add_card(Card(NINE, HEARTS));    // Trump
+    p->add_card(Card(TEN, HEARTS));     // Trump
+    p->add_card(Card(QUEEN, HEARTS));   // Trump
+    
+    // Should discard NINE of DIAMONDS (lowest non-trump) rather than NINE of HEARTS (trump)
+    p->add_and_discard(Card(KING, CLUBS));
+    
+    // Verify NINE of DIAMONDS was discarded by checking remaining cards
+    Card led_card(ACE, DIAMONDS);
+    ASSERT_EQUAL(p->play_card(led_card, HEARTS), Card(TEN, DIAMONDS));
+    delete p;
+}
+
+TEST(test_add_discard_left_bower_consideration) {
+    Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(JACK, DIAMONDS));  // Left bower (effectively HEARTS)
+    p->add_card(Card(NINE, DIAMONDS));  // Non-trump
+    p->add_card(Card(TEN, HEARTS));     // Trump
+    p->add_card(Card(QUEEN, HEARTS));   // Trump
+    p->add_card(Card(KING, HEARTS));    // Trump
+    
+    // Should discard NINE of DIAMONDS (lowest non-trump) and keep left bower
+    p->add_and_discard(Card(ACE, CLUBS));
+    
+    // Verify NINE of DIAMONDS was discarded by playing all cards
+    Card led_card(ACE, DIAMONDS);
+    ASSERT_EQUAL(p->play_card(led_card, HEARTS), Card(JACK, DIAMONDS));
+    delete p;
+}
+
 TEST(test_make_trump_mixed_suits) {
     Player* p = Player_factory("Test", "Simple");
     p->add_card(Card(KING, HEARTS));
