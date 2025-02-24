@@ -31,8 +31,7 @@ Rank string_to_rank(const std::string &str) {
       return static_cast<Rank>(r);
     }
   }
-  //assert(false); // Input string didn't match any rank
-  return {};
+  return static_cast<Rank>(-1);  // Return invalid rank
 }
 
 //EFFECTS Prints Rank to stream, for example "Two"
@@ -70,8 +69,7 @@ Suit string_to_suit(const std::string &str) {
       return static_cast<Suit>(s);
     }
   }
-  //assert(false); // Input string didn't match any suit
-  return {};
+  return static_cast<Suit>(-1);  // Return invalid suit
 }
 
 //EFFECTS Prints Suit to stream, for example "Spades"
@@ -169,9 +167,18 @@ std::istream & operator>>(std::istream &is, Card &card){
     is.setstate(std::ios::failbit); 
     return is;
   }
-  card.rank = string_to_rank(rank_str); 
-  card.suit = string_to_suit(suit_str); 
-
+  
+  Rank rank = string_to_rank(rank_str);
+  Suit suit = string_to_suit(suit_str);
+  
+  // Check if either rank or suit is invalid
+  if (rank < TWO || rank > ACE || suit < SPADES || suit > DIAMONDS) {
+    is.setstate(std::ios::failbit);
+    return is;
+  }
+  
+  card.rank = rank;
+  card.suit = suit;
   return is;
 }
 
