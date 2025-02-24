@@ -226,7 +226,7 @@ bool operator==(const Card &lhs, const Card &rhs){
 
 //bool operator!=(const Card &lhs, const Card &rhs)
 bool operator!=(const Card &lhs, const Card &rhs){
-  return !(lhs == rhs);
+  return (lhs.get_rank() != rhs.get_rank());
 }
 
 // NOTE: We HIGHLY recommend you check out the operator overloading

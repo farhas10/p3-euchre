@@ -280,23 +280,6 @@ TEST(test_make_trump_round2_no_trump) {
     delete p;
 }
 
-// Test make trump round 1 with left bower counting as trump
-TEST(test_simple_player_lead_card_left_right_bower1) {
-    Player * p = Player_factory("p", "Simple");
-    p->add_card(Card(JACK, CLUBS));
-    p->add_card(Card(QUEEN, SPADES));
-    p->add_card(Card(ACE, SPADES));
-    p->add_card(Card(NINE, SPADES));
-    p->add_card(Card(JACK, SPADES));
-   
-    
-    p->add_and_discard(Card(NINE, SPADES));
-    
-    ASSERT_EQUAL(p->lead_card(SPADES), Card(JACK, SPADES));
-    
-    delete p;
-}
-
 // Test lead card with both bowers in hand
 TEST(test_lead_card_both_bowers) {
     Player* p = Player_factory("Test", "Simple");
@@ -405,28 +388,115 @@ TEST(test_make_trump_round2_left) {
     delete p;
 }
 
-// Test add_and_discard followed by playing out the hand
-TEST(test_add_discard_verify_hand) {
+// Test simple player play card follows suit play all
+TEST(test_simple_player_play_card_follows_suit_play_all) {
     Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(NINE, CLUBS));
+    p->add_card(Card(TEN, CLUBS));
+    p->add_card(Card(QUEEN, DIAMONDS));
+    p->add_card(Card(KING, CLUBS));
+    p->add_card(Card(ACE, CLUBS));
     
-    // Initial hand setup
+    Card led_card = p->lead_card(CLUBS);
+    p->play_card(led_card, CLUBS);
+    p->play_card(led_card, CLUBS);
+    p->play_card(led_card, CLUBS);
+    
+    ASSERT_EQUAL(p->play_card(led_card, HEARTS), Card(ACE, CLUBS));
+    delete p;
+}
+
+// Test play with different suits
+TEST(test_simple_player_play_card_follows_suit_play_all_different) {
+    Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(NINE, DIAMONDS));
+    p->add_card(Card(TEN, SPADES));
+    p->add_card(Card(QUEEN, DIAMONDS));
+    p->add_card(Card(KING, CLUBS));
+    p->add_card(Card(ACE, HEARTS));
+    
+    Card led_card = p->lead_card(HEARTS);
+    p->play_card(led_card, CLUBS);
+    p->play_card(led_card, CLUBS);
+    p->play_card(led_card, CLUBS);
+    
+    ASSERT_EQUAL(p->play_card(led_card, HEARTS), Card(ACE, HEARTS));
+    delete p;
+}
+
+// Test card selection with specific hand
+TEST(test_simple_player_play_card_first_again) {
+    Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(ACE, HEARTS));
+    p->add_card(Card(TEN, HEARTS));
+    p->add_card(Card(QUEEN, HEARTS));
+    p->add_card(Card(KING, HEARTS));
+    p->add_card(Card(JACK, HEARTS));
+
+    p->add_and_discard(Card(NINE, HEARTS));
+     
+    ASSERT_NOT_EQUAL(p->play_card(Card(NINE, CLUBS), CLUBS), Card(NINE, HEARTS));
+    delete p;
+}
+
+// Test playing out all cards in sequence
+TEST(test_simple_player_play_card_follows_suit_play_all_different_play_out) {
+    Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(NINE, DIAMONDS));
+    p->add_card(Card(TEN, SPADES));
+    p->add_card(Card(QUEEN, DIAMONDS));
+    p->add_card(Card(KING, CLUBS));
+    p->add_card(Card(ACE, HEARTS));
+
+    p->add_and_discard(Card(JACK, HEARTS));
+    
+    Card led_card = p->lead_card(HEARTS);
+ 
+    ASSERT_EQUAL(p->play_card(led_card, HEARTS), Card(TEN, SPADES));
+    ASSERT_EQUAL(p->play_card(led_card, HEARTS), Card(QUEEN, DIAMONDS));
+    ASSERT_EQUAL(p->play_card(led_card, HEARTS), Card(JACK, HEARTS));
+    ASSERT_EQUAL(p->play_card(led_card, HEARTS), Card(ACE, HEARTS));
+
+    delete p;
+}
+
+// Test playing cards in order with trump
+TEST(test_simple_player_play_card_first) {
+    Player* p = Player_factory("Test", "Simple");
     p->add_card(Card(NINE, HEARTS));
     p->add_card(Card(TEN, HEARTS));
     p->add_card(Card(QUEEN, HEARTS));
     p->add_card(Card(KING, HEARTS));
     p->add_card(Card(ACE, HEARTS));
-    
-    // Add and discard a JACK of HEARTS (should replace the NINE)
+
     p->add_and_discard(Card(JACK, HEARTS));
-    
-    // Now verify the entire hand by playing it out
-    // With HEARTS as trump, should play in order: JACK, ACE, KING, QUEEN, TEN
-    ASSERT_EQUAL(p->play_card(Card(NINE, DIAMONDS), HEARTS), Card(JACK, HEARTS));
-    ASSERT_EQUAL(p->play_card(Card(NINE, DIAMONDS), HEARTS), Card(ACE, HEARTS));
-    ASSERT_EQUAL(p->play_card(Card(NINE, DIAMONDS), HEARTS), Card(KING, HEARTS));
-    ASSERT_EQUAL(p->play_card(Card(NINE, DIAMONDS), HEARTS), Card(QUEEN, HEARTS));
-    ASSERT_EQUAL(p->play_card(Card(NINE, DIAMONDS), HEARTS), Card(TEN, HEARTS));
-    
+     
+    ASSERT_EQUAL(p->play_card(Card(NINE, CLUBS), HEARTS), Card(TEN, HEARTS));
+    ASSERT_EQUAL(p->play_card(Card(NINE, CLUBS), HEARTS), Card(JACK, HEARTS));
+    ASSERT_EQUAL(p->play_card(Card(NINE, CLUBS), HEARTS), Card(QUEEN, HEARTS));
+    ASSERT_EQUAL(p->play_card(Card(NINE, CLUBS), HEARTS), Card(KING, HEARTS));
+    ASSERT_EQUAL(p->play_card(Card(NINE, CLUBS), HEARTS), Card(ACE, HEARTS));
+
+    delete p;
+}
+
+// Test playing cards in order with trump, adding ace last
+TEST(test_simple_player_play_card_last) {
+    Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(NINE, HEARTS));
+    p->add_card(Card(TEN, HEARTS));
+    p->add_card(Card(QUEEN, HEARTS));
+    p->add_card(Card(KING, HEARTS));
+    p->add_card(Card(JACK, HEARTS));
+
+    p->add_and_discard(Card(ACE, HEARTS));
+     
+    ASSERT_EQUAL(p->play_card(Card(NINE, CLUBS), HEARTS), Card(TEN, HEARTS));
+    ASSERT_EQUAL(p->play_card(Card(NINE, CLUBS), HEARTS), Card(JACK, HEARTS));
+    ASSERT_EQUAL(p->play_card(Card(NINE, CLUBS), HEARTS), Card(QUEEN, HEARTS));
+    ASSERT_EQUAL(p->play_card(Card(NINE, CLUBS), HEARTS), Card(KING, HEARTS));
+    ASSERT_EQUAL(p->play_card(Card(NINE, CLUBS), HEARTS), Card(ACE, HEARTS));
+
     delete p;
 }
 

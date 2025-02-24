@@ -1,6 +1,7 @@
 #include "Player.hpp"
 #include <cassert>
 #include <iostream>
+#include <algorithm>
 
 // Define concrete classes here in the .cpp file
 class Simple : public Player {
@@ -69,6 +70,8 @@ const std::string & Simple::get_name() const {
 
 void Simple::add_card(const Card &c) {
     hand.push_back(c);
+    // Sort hand after adding new card
+    std::sort(hand.begin(), hand.end());
 }
 
 bool Simple::make_trump(const Card &upcard, bool is_dealer,
@@ -109,109 +112,71 @@ bool Simple::make_trump(const Card &upcard, bool is_dealer,
 }
 
 void Simple::add_and_discard(const Card &upcard) {
-    std::cout << "\nBefore add_and_discard, hand: ";
-    for (const Card &c : hand) {
-        std::cout << c << ", ";
-    }
-    
     hand.push_back(upcard);
-    std::cout << "\nAfter adding " << upcard << ", hand: ";
-    for (const Card &c : hand) {
-        std::cout << c << ", ";
-    }
-    
-    size_t discard_index = 0;
-    Suit trump = upcard.get_suit();
-    
-    for (size_t i = 1; i < hand.size(); ++i) {
-        std::cout << "\nComparing " << hand[i] << " with " << hand[discard_index];
-        if (Card_less(hand[i], hand[discard_index], trump)) {
-            discard_index = i;
-            std::cout << " - new lowest";
-        }
-    }
-    
-    std::cout << "\nDiscarding: " << hand[discard_index];
-    hand.erase(hand.begin() + discard_index);
-    
-    std::cout << "\nFinal hand: ";
-    for (const Card &c : hand) {
-        std::cout << c << ", ";
-    }
-    std::cout << "\n";
+    std::sort(hand.begin(), hand.end());
+    // Remove lowest card (first card after sorting)
+    hand.erase(hand.begin());
 }
 
 Card Simple::lead_card(Suit trump) {
-    // Find highest non-trump card
-    size_t highest_index = 0;
-    bool found_non_trump = false;
+    std::sort(hand.begin(), hand.end());
     
-    // First try to find the highest non-trump card
-    for (size_t i = 0; i < hand.size(); ++i) {
+    // First try to find highest non-trump card
+    for (int i = hand.size() - 1; i >= 0; i--) {
         if (!hand[i].is_trump(trump)) {
-            if (!found_non_trump || hand[i] > hand[highest_index]) {
-                highest_index = i;
-                found_non_trump = true;
-            }
+            Card card_to_play = hand[i];
+            hand.erase(hand.begin() + i);
+            return card_to_play;
         }
     }
     
-    // If we only have trump cards, find the highest trump
-    if (!found_non_trump) {
-        for (size_t i = 1; i < hand.size(); ++i) {
-            if (!Card_less(hand[i], hand[highest_index], trump)) {
-                highest_index = i; 
-            }
+    // If only trump cards remain, check for right and left bowers
+    for (int i = hand.size() - 1; i >= 0; i--) {
+        if (hand[i].is_right_bower(trump)) {
+            Card card_to_play = hand[i];
+            hand.erase(hand.begin() + i);
+            return card_to_play;
         }
     }
     
-    // Remove and return the selected card
-    Card card_to_play = hand[highest_index];
-    hand.erase(hand.begin() + highest_index);
+    for (int i = hand.size() - 1; i >= 0; i--) {
+        if (hand[i].is_left_bower(trump)) {
+            Card card_to_play = hand[i];
+            hand.erase(hand.begin() + i);
+            return card_to_play;
+        }
+    }
+    
+    // Play highest remaining trump
+    Card card_to_play = hand.back();
+    hand.pop_back();
     return card_to_play;
 }
 
 Card Simple::play_card(const Card &led_card, Suit trump) {
-    size_t play_index = 0;
-    bool can_follow_suit = false;
+    std::sort(hand.begin(), hand.end());
     
-    // First check if we can follow suit
-    for (size_t i = 0; i < hand.size(); ++i) {
-        if (hand[i].get_suit(trump) == led_card.get_suit(trump)) {
-            if (!can_follow_suit) {
-                play_index = i;
-                can_follow_suit = true;
-            }
-            else if (Card_less(hand[play_index], hand[i], led_card, trump)) {
-                play_index = i;
-            }
+    // Try to follow suit with highest card
+    for (int i = hand.size() - 1; i >= 0; i--) {
+        if (hand[i].get_suit() == led_card.get_suit()) {
+            Card card_to_play = hand[i];
+            hand.erase(hand.begin() + i);
+            return card_to_play;
         }
     }
     
-    // If we can't follow suit, play our highest trump if we have one
-    if (!can_follow_suit) {
-        bool found_trump = false;
-        for (size_t i = 0; i < hand.size(); ++i) {
-            if (hand[i].is_trump(trump)) {
-                if (!found_trump || Card_less(hand[play_index], hand[i], trump)) {
-                    play_index = i;
-                    found_trump = true;
-                }
-            }
-        }
-        
-        // If no trump, play lowest card
-        if (!found_trump) {
-            for (size_t i = 1; i < hand.size(); ++i) {
-                if (Card_less(hand[i], hand[play_index], led_card, trump)) {
-                    play_index = i;
-                }
-            }
+    // If can't follow suit, play lowest non-trump
+    for (size_t i = 0; i < hand.size(); i++) {
+        if (!hand[i].is_trump(trump)) {
+            Card card_to_play = hand[i];
+            hand.erase(hand.begin() + i);
+            return card_to_play;
         }
     }
     
-    Card card_to_play = hand[play_index];
-    hand.erase(hand.begin() + play_index);
+    // If only trump remains, play lowest trump
+    Card card_to_play = hand.front();
+    hand.erase(hand.begin());
     return card_to_play;
 }
 
