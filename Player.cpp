@@ -109,23 +109,36 @@ bool Simple::make_trump(const Card &upcard, bool is_dealer,
 }
 
 void Simple::add_and_discard(const Card &upcard) {
-    // Add the upcard first
+    std::cout << "\nBefore add_and_discard, hand: ";
+    for (const Card &c : hand) {
+        std::cout << c << ", ";
+    }
+    
     hand.push_back(upcard);
+    std::cout << "\nAfter adding " << upcard << ", hand: ";
+    for (const Card &c : hand) {
+        std::cout << c << ", ";
+    }
     
-    // Find the lowest card to discard
     size_t discard_index = 0;
-    Suit trump = upcard.get_suit();  // The upcard's suit is trump
+    Suit trump = upcard.get_suit();
     
-    // Compare each card with the current lowest
     for (size_t i = 1; i < hand.size(); ++i) {
-        // If current card is lower than our lowest so far, update discard_index
+        std::cout << "\nComparing " << hand[i] << " with " << hand[discard_index];
         if (Card_less(hand[i], hand[discard_index], trump)) {
             discard_index = i;
+            std::cout << " - new lowest";
         }
     }
     
-    // Remove the lowest card
+    std::cout << "\nDiscarding: " << hand[discard_index];
     hand.erase(hand.begin() + discard_index);
+    
+    std::cout << "\nFinal hand: ";
+    for (const Card &c : hand) {
+        std::cout << c << ", ";
+    }
+    std::cout << "\n";
 }
 
 Card Simple::lead_card(Suit trump) {
@@ -159,30 +172,44 @@ Card Simple::lead_card(Suit trump) {
 }
 
 Card Simple::play_card(const Card &led_card, Suit trump) {
-    // Must follow suit if possible
     size_t play_index = 0;
     bool can_follow_suit = false;
     
     // First check if we can follow suit
     for (size_t i = 0; i < hand.size(); ++i) {
         if (hand[i].get_suit(trump) == led_card.get_suit(trump)) {
-            if (!can_follow_suit || Card_less(hand[play_index], hand[i], led_card, trump)) {
+            if (!can_follow_suit) {
                 play_index = i;
                 can_follow_suit = true;
             }
-        }
-    }
-    
-    // If we can't follow suit, play lowest card
-    if (!can_follow_suit) {
-        for (size_t i = 1; i < hand.size(); ++i) {
-            if (Card_less(hand[i], hand[play_index], led_card, trump)) {
+            else if (Card_less(hand[play_index], hand[i], led_card, trump)) {
                 play_index = i;
             }
         }
     }
     
-    // Remove and return the selected card
+    // If we can't follow suit, play our highest trump if we have one
+    if (!can_follow_suit) {
+        bool found_trump = false;
+        for (size_t i = 0; i < hand.size(); ++i) {
+            if (hand[i].is_trump(trump)) {
+                if (!found_trump || Card_less(hand[play_index], hand[i], trump)) {
+                    play_index = i;
+                    found_trump = true;
+                }
+            }
+        }
+        
+        // If no trump, play lowest card
+        if (!found_trump) {
+            for (size_t i = 1; i < hand.size(); ++i) {
+                if (Card_less(hand[i], hand[play_index], led_card, trump)) {
+                    play_index = i;
+                }
+            }
+        }
+    }
+    
     Card card_to_play = hand[play_index];
     hand.erase(hand.begin() + play_index);
     return card_to_play;

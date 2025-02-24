@@ -405,4 +405,29 @@ TEST(test_make_trump_round2_left) {
     delete p;
 }
 
+// Test add_and_discard followed by playing out the hand
+TEST(test_add_discard_verify_hand) {
+    Player* p = Player_factory("Test", "Simple");
+    
+    // Initial hand setup
+    p->add_card(Card(NINE, HEARTS));
+    p->add_card(Card(TEN, HEARTS));
+    p->add_card(Card(QUEEN, HEARTS));
+    p->add_card(Card(KING, HEARTS));
+    p->add_card(Card(ACE, HEARTS));
+    
+    // Add and discard a JACK of HEARTS (should replace the NINE)
+    p->add_and_discard(Card(JACK, HEARTS));
+    
+    // Now verify the entire hand by playing it out
+    // With HEARTS as trump, should play in order: JACK, ACE, KING, QUEEN, TEN
+    ASSERT_EQUAL(p->play_card(Card(NINE, DIAMONDS), HEARTS), Card(JACK, HEARTS));
+    ASSERT_EQUAL(p->play_card(Card(NINE, DIAMONDS), HEARTS), Card(ACE, HEARTS));
+    ASSERT_EQUAL(p->play_card(Card(NINE, DIAMONDS), HEARTS), Card(KING, HEARTS));
+    ASSERT_EQUAL(p->play_card(Card(NINE, DIAMONDS), HEARTS), Card(QUEEN, HEARTS));
+    ASSERT_EQUAL(p->play_card(Card(NINE, DIAMONDS), HEARTS), Card(TEN, HEARTS));
+    
+    delete p;
+}
+
 TEST_MAIN()

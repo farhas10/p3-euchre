@@ -152,6 +152,19 @@ TEST(card_less_no_trump){
 
     ASSERT_TRUE(Card_less(c1, c2, led, CLUBS));  
 }
+TEST(card_less_same_suit) {
+    Card c1(QUEEN, HEARTS);
+    Card c2(KING, HEARTS);
+    ASSERT_TRUE(Card_less(c1, c2, DIAMONDS));  
+    ASSERT_TRUE(Card_less(c1, c2, CLUBS));     
+}
+
+TEST(card_less_different_suits) {
+    Card c1(ACE, DIAMONDS);
+    Card c2(NINE, HEARTS);
+    ASSERT_FALSE(Card_less(c1, c2, CLUBS));    
+    ASSERT_TRUE(Card_less(c1, c2, HEARTS));    
+}
 //suit_next
 TEST(test_suit_next){
     ASSERT_EQUAL(SPADES, Suit_next(CLUBS));
