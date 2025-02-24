@@ -173,4 +173,52 @@ TEST(test_suit_next){
     ASSERT_EQUAL(DIAMONDS, Suit_next(HEARTS));
 }
 
+//get_rank
+TEST(test_get_rank_basic) {
+    Card c(NINE, DIAMONDS);
+    ASSERT_EQUAL(NINE, c.get_rank());
+}
+
+//get_suit (non-bower cases)
+TEST(get_suit_non_bower) {
+    Card c(QUEEN, CLUBS);
+    ASSERT_EQUAL(CLUBS, c.get_suit(HEARTS));
+}
+
+//ace or face (additional cases)
+TEST(test_is_face_or_ace_additional) {
+    Card c1(QUEEN, DIAMONDS);
+    Card c2(JACK, CLUBS);
+    
+    ASSERT_TRUE(c1.is_face_or_ace());
+    ASSERT_TRUE(c2.is_face_or_ace());
+}
+
+//operators with equal cards
+TEST(operator_equal_cards) {
+    Card c1(QUEEN, DIAMONDS);
+    Card c2(QUEEN, DIAMONDS);
+    ASSERT_TRUE(c1 == c2);
+    ASSERT_TRUE(c1 >= c2);
+    ASSERT_TRUE(c1 <= c2);
+    ASSERT_FALSE(c1 > c2);
+    ASSERT_FALSE(c1 < c2);
+}
+
+//additional input/output tests
+TEST(test_card_input_king) {
+    istringstream input("King of Hearts");
+    Card c;
+    input >> c;
+    ASSERT_EQUAL(KING, c.get_rank());
+    ASSERT_EQUAL(HEARTS, c.get_suit());
+}
+
+TEST(card_less_led_specific) {
+    Card c1(EIGHT, DIAMONDS);
+    Card c2(JACK, CLUBS);
+    Card led(SEVEN, DIAMONDS);
+    ASSERT_TRUE(Card_less(c1, c2, led, CLUBS));
+}
+
 TEST_MAIN()
