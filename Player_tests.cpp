@@ -5,324 +5,311 @@
 
 using namespace std;
 
-TEST(test_player_get_name) {
-    Player * ryan = Player_factory("ryan", "Simple");
-    Player * jane = Player_factory("jane", "Human");
+// Basic factory and name tests
+TEST(test_player_creation) {
+    Player* p1 = Player_factory("Ryan", "Simple");
+    Player* p2 = Player_factory("Maria", "Human");
     
-    ASSERT_EQUAL("ryan", ryan->get_name());
-    ASSERT_EQUAL("jane", jane->get_name());
-
-    delete ryan;
-    delete jane;
+    ASSERT_EQUAL("Ryan", p1->get_name());
+    ASSERT_EQUAL("Maria", p2->get_name());
+    
+    delete p1;
+    delete p2;
 }
 
-TEST(test_add_card) {
-    Player * player = Player_factory("Test", "Simple");
-    
-    // Add multiple cards and verify they're added via make_trump
-    Card c1(JACK, HEARTS);
-    Card c2(JACK, DIAMONDS);
-    Card c3(ACE, HEARTS);
-    
-    player->add_card(c1);
-    player->add_card(c2);
-    player->add_card(c3);
-    
-    // Should order up hearts with 2 face cards
-    Suit trump = SPADES;  // Initialize to different suit
-    ASSERT_TRUE(player->make_trump(Card(NINE, HEARTS), false, 1, trump));
-    ASSERT_EQUAL(trump, HEARTS);
-    
-    delete player;
+// Test string output operator
+TEST(test_player_output) {
+    Player* p = Player_factory("TestPlayer", "Simple");
+    ostringstream oss;
+    oss << *p;
+    ASSERT_EQUAL("TestPlayer", oss.str());
+    delete p;
 }
 
-TEST(test_make_trump_round1) {
-    Player * player = Player_factory("Test", "Simple");
+// Test lead card with only non-trump
+TEST(test_lead_all_non_trump) {
+    Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(KING, DIAMONDS));
+    p->add_card(Card(QUEEN, CLUBS));
+    p->add_card(Card(ACE, DIAMONDS));
     
-    // Test case 1: Less than 2 face cards - should pass
-    player->add_card(Card(JACK, HEARTS));
-    player->add_card(Card(NINE, HEARTS));
-    player->add_card(Card(TEN, SPADES));
-    
-    Suit trump = CLUBS;
-    ASSERT_FALSE(player->make_trump(Card(ACE, HEARTS), false, 1, trump));
-    
-    delete player;
-    
-    // Test case 2: Exactly 2 face cards - should order up
-    player = Player_factory("Test", "Simple");
-    player->add_card(Card(JACK, HEARTS));
-    player->add_card(Card(QUEEN, HEARTS));
-    player->add_card(Card(NINE, SPADES));
-    
-    trump = CLUBS;
-    ASSERT_TRUE(player->make_trump(Card(NINE, HEARTS), false, 1, trump));
-    ASSERT_EQUAL(trump, HEARTS);
-    
-    delete player;
+    ASSERT_EQUAL(p->lead_card(HEARTS), Card(ACE, DIAMONDS));
+    delete p;
 }
 
-TEST(test_make_trump_round1_wrong_suit) {
-    Player * player = Player_factory("Test", "Simple");
+// Test lead card with only trump
+TEST(test_lead_all_trump) {
+    Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(JACK, HEARTS));
+    p->add_card(Card(QUEEN, HEARTS));
+    p->add_card(Card(KING, HEARTS));
     
-    // Test case: 2 face cards but in wrong suit - should pass
-    player->add_card(Card(JACK, DIAMONDS));
-    player->add_card(Card(QUEEN, DIAMONDS));
-    player->add_card(Card(NINE, SPADES));
-    
-    Suit trump = CLUBS;
-    ASSERT_FALSE(player->make_trump(Card(NINE, HEARTS), false, 1, trump));
-    // trump should remain unchanged
-    ASSERT_EQUAL(trump, CLUBS);
-    
-    delete player;
+    ASSERT_EQUAL(p->lead_card(HEARTS), Card(JACK, HEARTS));
+    delete p;
 }
 
-TEST(test_make_trump_round2) {
-    Player * player = Player_factory("Test", "Simple");
+// Test lead card with right bower
+TEST(test_lead_right_bower) {
+    Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(JACK, HEARTS));
+    p->add_card(Card(NINE, DIAMONDS));
     
-    // Test case 1: Dealer with no face cards should order up
-    player->add_card(Card(NINE, DIAMONDS));
-    player->add_card(Card(TEN, DIAMONDS));
-    player->add_card(Card(NINE, SPADES));
-    
-    Suit trump = CLUBS;
-    ASSERT_TRUE(player->make_trump(Card(ACE, HEARTS), true, 2, trump));
-    ASSERT_EQUAL(trump, DIAMONDS);  // Next suit after Hearts
-    
-    delete player;
-    
-    // Test case 2: Non-dealer with one face card should order up
-    player = Player_factory("Test", "Simple");
-    player->add_card(Card(JACK, DIAMONDS));
-    player->add_card(Card(NINE, CLUBS));
-    player->add_card(Card(TEN, SPADES));
-    
-    trump = CLUBS;
-    ASSERT_TRUE(player->make_trump(Card(ACE, HEARTS), false, 2, trump));
-    ASSERT_EQUAL(trump, DIAMONDS);
-    
-    delete player;
+    ASSERT_EQUAL(p->lead_card(HEARTS), Card(NINE, DIAMONDS));
+    delete p;
 }
 
-TEST(test_lead_card) {
-    Player * player = Player_factory("Test", "Simple");
+// Test lead card with left bower
+TEST(test_lead_card_left_bower_spades) {
+    Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(NINE, SPADES));
+    p->add_card(Card(JACK, CLUBS));
+    p->add_card(Card(QUEEN, SPADES));
+    p->add_card(Card(ACE, SPADES));
     
-    // Test leading when having both trump and non-trump
-    Card c1(ACE, HEARTS);    // High non-trump
-    Card c2(JACK, SPADES);   // Trump
-    Card c3(NINE, SPADES);   // Lower trump
+    p->add_and_discard(Card(NINE, SPADES));
     
-    player->add_card(c1);
-    player->add_card(c2);
-    player->add_card(c3);
-    
-    // Should lead highest non-trump
-    Card led = player->lead_card(SPADES);
-    ASSERT_EQUAL(led, c1);
-    
-    delete player;
-    
-    // Test leading with only trump cards
-    player = Player_factory("Test", "Simple");
-    player->add_card(Card(JACK, SPADES));
-    player->add_card(Card(QUEEN, SPADES));
-    player->add_card(Card(NINE, SPADES));
-    
-    // Should lead highest trump
-    led = player->lead_card(SPADES);
-    ASSERT_EQUAL(led.get_rank(), JACK);
-    ASSERT_EQUAL(led.get_suit(), SPADES);
-    
-    delete player;
+    ASSERT_EQUAL(p->lead_card(SPADES), Card(JACK, CLUBS));
+    delete p;
 }
 
-TEST(test_play_card) {
-    Player * player = Player_factory("Test", "Simple");
+// Test lead card with all trump except one
+TEST(test_lead_card_all_but_one_trump) {
+    Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(NINE, DIAMONDS));
+    p->add_card(Card(JACK, CLUBS));
+    p->add_card(Card(KING, SPADES));
+    p->add_card(Card(QUEEN, SPADES));
+    p->add_card(Card(ACE, SPADES));
     
-    // Add some cards
-    Card c1(ACE, HEARTS);
-    Card c2(KING, HEARTS);
-    Card c3(QUEEN, SPADES);
+    p->add_and_discard(Card(NINE, DIAMONDS));
     
-    player->add_card(c1);
-    player->add_card(c2);
-    player->add_card(c3);
-    
-    // Verify basic play_card functionality
-    Card played = player->play_card(Card(NINE, HEARTS), DIAMONDS);
-    ASSERT_TRUE(played == c1 || played == c2 || played == c3);
-    
-    delete player;
+    ASSERT_EQUAL(p->lead_card(SPADES), Card(NINE, DIAMONDS));
+    delete p;
 }
 
-TEST(test_add_and_discard) {
-    Player * player = Player_factory("Test", "Simple");
+// Test make trump round 1 with one face card
+TEST(test_make_trump_round1_one_face) {
+    Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(KING, SPADES));
+    p->add_card(Card(TEN, SPADES));
     
-    // Add initial cards
-    player->add_card(Card(NINE, HEARTS));
-    player->add_card(Card(TEN, HEARTS));
-    player->add_card(Card(JACK, HEARTS));
-    player->add_card(Card(QUEEN, HEARTS));
-    player->add_card(Card(KING, HEARTS));
-    
-    // Add and discard should maintain hand size
-    Card upcard(ACE, HEARTS);
-    player->add_and_discard(upcard);
-    
-    // Verify hand size is still 5 by adding another card
-    Card new_card(NINE, SPADES);
-    player->add_card(new_card);
-    
-    // Should still work normally for play_card
-    Card played = player->play_card(Card(NINE, DIAMONDS), HEARTS);
-    // Verify the card has a valid rank (NINE or higher)
-    ASSERT_TRUE(played.get_rank() >= NINE);
-    
-    delete player;
-}
-
-TEST(test_play_card_follow_suit) {
-    Player * player = Player_factory("Test", "Simple");
-    
-    // Test when player must follow suit
-    Card c1(NINE, HEARTS);
-    Card c2(KING, HEARTS);
-    Card c3(ACE, SPADES);
-    
-    player->add_card(c1);
-    player->add_card(c2);
-    player->add_card(c3);
-    
-    // When led card is Hearts, must play a Heart
-    Card played = player->play_card(Card(QUEEN, HEARTS), DIAMONDS);
-    ASSERT_TRUE(played.get_suit() == HEARTS);
-    
-    delete player;
-}
-
-TEST(test_play_card_no_matching_suit) {
-    Player * player = Player_factory("Test", "Simple");
-    
-    // Test when player cannot follow suit
-    Card c1(NINE, HEARTS);
-    Card c2(KING, HEARTS);
-    Card c3(ACE, HEARTS);
-    
-    player->add_card(c1);
-    player->add_card(c2);
-    player->add_card(c3);
-    
-    // When led card is Spades but we have no Spades
-    Card played = player->play_card(Card(QUEEN, SPADES), DIAMONDS);
-    ASSERT_TRUE(played.get_suit() == HEARTS);
-    
-    delete player;
-}
-
-TEST(test_make_trump_empty_hand) {
-    Player * player = Player_factory("Test", "Simple");
-    
-    // Test making trump with empty hand in round 1
     Suit trump = HEARTS;
-    ASSERT_FALSE(player->make_trump(Card(ACE, SPADES), false, 1, trump));
-    ASSERT_EQUAL(trump, HEARTS);  // Trump should remain unchanged
-    
-    // Test making trump with empty hand in round 2 (even as dealer)
-    trump = CLUBS;
-    ASSERT_FALSE(player->make_trump(Card(ACE, SPADES), true, 2, trump));
-    ASSERT_EQUAL(trump, CLUBS);   // Trump should remain unchanged
-    
-    delete player;
+    ASSERT_FALSE(p->make_trump(Card(ACE, SPADES), false, 1, trump));
+    delete p;
 }
 
-TEST(test_make_trump_single_card) {
-    Player * player = Player_factory("Test", "Simple");
+// Test make trump round 1 with right bower only
+TEST(test_make_trump_round1_right_bower) {
+    Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(JACK, SPADES));
+    p->add_card(Card(NINE, SPADES));
     
-    // Test making trump with just one card
-    player->add_card(Card(JACK, HEARTS));
-    
-    Suit trump = DIAMONDS;
-    ASSERT_FALSE(player->make_trump(Card(ACE, HEARTS), false, 1, trump));
-    
-    // Should order up in round 2 as dealer
-    ASSERT_TRUE(player->make_trump(Card(ACE, HEARTS), true, 2, trump));
-    
-    delete player;
+    Suit trump = HEARTS;
+    ASSERT_FALSE(p->make_trump(Card(ACE, SPADES), false, 1, trump));
+    delete p;
 }
 
-TEST(test_lead_card_empty_hand) {
-    Player * player = Player_factory("Test", "Simple");
+// Test make trump round 2 as dealer
+TEST(test_make_trump_round2_dealer) {
+    Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(NINE, DIAMONDS));
+    p->add_card(Card(TEN, CLUBS));
     
-    // Add one card so we don't have an empty hand
-    Card test_card(NINE, HEARTS);
-    player->add_card(test_card);
-    
-    // Lead the card
-    Card led = player->lead_card(HEARTS);
-    ASSERT_EQUAL(led, test_card);
-    
-    delete player;
+    Suit trump = CLUBS;
+    ASSERT_TRUE(p->make_trump(Card(ACE, HEARTS), true, 2, trump));
+    delete p;
 }
 
-TEST(test_card_counting) {
-    Player * player = Player_factory("Test", "Simple");
+// Test make trump round 2 with face in next suit
+TEST(test_make_trump_round2_next_face) {
+    Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(KING, DIAMONDS));
+    p->add_card(Card(NINE, CLUBS));
     
-    // Add maximum number of cards using proper Card construction
-    player->add_card(Card(NINE, HEARTS));
-    player->add_card(Card(TEN, HEARTS));
-    player->add_card(Card(JACK, HEARTS));
-    player->add_card(Card(QUEEN, HEARTS));
-    player->add_card(Card(KING, HEARTS));
-    
-    // Verify we can still add one more through add_and_discard
-    Card upcard(ACE, SPADES);
-    player->add_and_discard(upcard);
-    
-    // Should still have exactly 5 cards
-    int count = 0;
-    for (int i = 0; i < 5; ++i) {
-        Card played = player->play_card(Card(NINE, DIAMONDS), CLUBS);
-        ASSERT_TRUE(played.get_rank() >= NINE && played.get_rank() <= ACE);
-        count++;
-    }
-    ASSERT_EQUAL(count, 5);
-    
-    delete player;
+    Suit trump = CLUBS;
+    ASSERT_TRUE(p->make_trump(Card(ACE, HEARTS), false, 2, trump));
+    delete p;
 }
 
-TEST(test_lead_card_with_left_bower) {
-    Player * player = Player_factory("Test", "Simple");
+// Test make trump round 2 with left bower
+TEST(test_make_trump_round2_left_bower) {
+    Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(JACK, DIAMONDS));
+    p->add_card(Card(NINE, CLUBS));
     
-    // Test leading when having left bower and other cards
-    player->add_card(Card(JACK, DIAMONDS));  // Left bower for Hearts
-    player->add_card(Card(NINE, CLUBS));     // Non-trump
-    player->add_card(Card(TEN, HEARTS));     // Trump
-    
-    // Should lead the non-trump card first
-    Card led = player->lead_card(HEARTS);
-    ASSERT_EQUAL(led.get_suit(), CLUBS);
-    ASSERT_EQUAL(led.get_rank(), NINE);
-    
-    delete player;
+    Suit trump = CLUBS;
+    ASSERT_TRUE(p->make_trump(Card(ACE, HEARTS), false, 2, trump));
+    delete p;
 }
 
-TEST(test_play_card_with_bowers) {
-    Player * player = Player_factory("Test", "Simple");
+// Test play card following suit
+TEST(test_play_card_follow_suit) {
+    Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(NINE, HEARTS));
+    p->add_card(Card(KING, HEARTS));
     
-    // Add both bowers and a regular card
-    player->add_card(Card(JACK, HEARTS));    // Right bower
-    player->add_card(Card(JACK, DIAMONDS));  // Left bower
-    player->add_card(Card(NINE, SPADES));    // Non-trump
+    Card played = p->play_card(Card(ACE, HEARTS), SPADES);
+    ASSERT_EQUAL(played, Card(KING, HEARTS));
+    delete p;
+}
+
+// Test play card with no matching suit
+TEST(test_play_card_no_match) {
+    Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(NINE, DIAMONDS));
+    p->add_card(Card(TEN, DIAMONDS));
     
-    // When hearts is led and hearts is trump
-    Card played = player->play_card(Card(NINE, HEARTS), HEARTS);
+    Card played = p->play_card(Card(ACE, HEARTS), SPADES);
+    ASSERT_EQUAL(played, Card(NINE, DIAMONDS));
+    delete p;
+}
+
+// Test play card with both bowers
+TEST(test_play_card_both_bowers) {
+    Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(JACK, HEARTS));
+    p->add_card(Card(JACK, DIAMONDS));
     
-    // Should play right bower as it's highest trump
-    ASSERT_EQUAL(played.get_rank(), JACK);
-    ASSERT_EQUAL(played.get_suit(), HEARTS);
+    Card played = p->play_card(Card(ACE, HEARTS), HEARTS);
+    ASSERT_EQUAL(played, Card(JACK, HEARTS));
+    delete p;
+}
+
+// Test add and discard with higher card
+TEST(test_add_discard_higher) {
+    Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(NINE, SPADES));
+    p->add_card(Card(TEN, SPADES));
+    p->add_card(Card(JACK, SPADES));
+    p->add_card(Card(QUEEN, SPADES));
+    p->add_card(Card(KING, SPADES));
     
-    delete player;
+    p->add_and_discard(Card(ACE, SPADES));
+    ASSERT_EQUAL(p->lead_card(HEARTS), Card(ACE, SPADES));
+    delete p;
+}
+
+// Test add and discard with lower card
+TEST(test_add_discard_lower) {
+    Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(TEN, SPADES));
+    p->add_card(Card(JACK, SPADES));
+    p->add_card(Card(QUEEN, SPADES));
+    p->add_card(Card(KING, SPADES));
+    p->add_card(Card(ACE, SPADES));
+    
+    p->add_and_discard(Card(NINE, SPADES));
+    ASSERT_EQUAL(p->lead_card(HEARTS), Card(ACE, SPADES));
+    delete p;
+}
+
+// Test single card scenarios
+TEST(test_single_card_plays) {
+    Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(ACE, SPADES));
+    
+    ASSERT_EQUAL(p->lead_card(HEARTS), Card(ACE, SPADES));
+    delete p;
+}
+
+// Test empty hand make trump
+TEST(test_empty_hand_make_trump) {
+    Player* p = Player_factory("Test", "Simple");
+    Suit trump = HEARTS;
+    ASSERT_FALSE(p->make_trump(Card(ACE, SPADES), false, 1, trump));
+    delete p;
+}
+
+
+// Test play card with only trump cards
+TEST(test_play_card_only_trump) {
+    Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(QUEEN, HEARTS));
+    p->add_card(Card(KING, HEARTS));
+    
+    Card played = p->play_card(Card(NINE, DIAMONDS), HEARTS);
+    ASSERT_EQUAL(played, Card(QUEEN, HEARTS));
+    delete p;
+}
+
+// Test make trump with mixed suits
+TEST(test_make_trump_mixed_suits) {
+    Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(KING, HEARTS));
+    p->add_card(Card(QUEEN, DIAMONDS));
+    p->add_card(Card(JACK, CLUBS));
+    
+    Suit trump = SPADES;
+    ASSERT_FALSE(p->make_trump(Card(ACE, HEARTS), false, 1, trump));
+    delete p;
+}
+
+// Test add and discard with equal cards
+TEST(test_add_discard_equal_cards) {
+    Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(NINE, HEARTS));
+    p->add_card(Card(NINE, DIAMONDS));
+    
+    p->add_and_discard(Card(NINE, SPADES));
+    Card played = p->play_card(Card(TEN, CLUBS), CLUBS);
+    ASSERT_EQUAL(played.get_rank(), NINE);
+    delete p;
+}
+
+// Test make trump round 2 with exactly one trump in next suit
+TEST(test_make_trump_round2_exactly_one_trump) {
+    Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(KING, CLUBS));     // One face card in next suit
+    p->add_card(Card(NINE, DIAMONDS));
+    p->add_card(Card(TEN, HEARTS));
+    
+    Suit trump = CLUBS;
+    ASSERT_TRUE(p->make_trump(Card(ACE, SPADES), false, 2, trump));
+    delete p;
+}
+
+// Test make trump round 2 with no trump in next suit
+TEST(test_make_trump_round2_no_trump) {
+    Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(KING, DIAMONDS));
+    p->add_card(Card(QUEEN, HEARTS));
+    p->add_card(Card(TEN, SPADES));
+    
+    Suit trump = CLUBS;  // Next suit after SPADES
+    ASSERT_FALSE(p->make_trump(Card(ACE, SPADES), false, 2, trump));
+    delete p;
+}
+
+// Test make trump round 1 with left bower counting as trump
+TEST(test_simple_player_lead_card_left_right_bower1) {
+    Player * p = Player_factory("John", "Simple");
+    p->add_card(Card(JACK, CLUBS));
+    p->add_card(Card(QUEEN, SPADES));
+    p->add_card(Card(ACE, SPADES));
+    p->add_card(Card(NINE, SPADES));
+    p->add_card(Card(JACK, SPADES));
+   
+    
+    p->add_and_discard(Card(NINE, SPADES));
+    
+    ASSERT_EQUAL(p->lead_card(SPADES), Card(JACK, SPADES));
+    
+    delete p;
+}
+
+// Test lead card with both bowers in hand
+TEST(test_lead_card_both_bowers) {
+    Player* p = Player_factory("Test", "Simple");
+    p->add_card(Card(JACK, CLUBS));
+    p->add_card(Card(QUEEN, SPADES));
+    p->add_card(Card(ACE, SPADES));
+    p->add_card(Card(NINE, SPADES));
+    p->add_card(Card(JACK, SPADES));
+   
+    p->add_and_discard(Card(NINE, SPADES));
+    
+    ASSERT_EQUAL(p->lead_card(SPADES), Card(JACK, SPADES));
+    delete p;
 }
 
 TEST_MAIN()

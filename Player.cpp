@@ -73,38 +73,33 @@ void Simple::add_card(const Card &c) {
 
 bool Simple::make_trump(const Card &upcard, bool is_dealer,
                        int round, Suit &order_up_suit) const {
-    // If hand is empty, never order up
     if (hand.empty()) {
         return false;
     }
     
-    // Count number of face cards or aces in the same suit as upcard
     int trump_face_cards = 0;
     
     if (round == 1) {
-        // In round 1, count cards of same suit as upcard
+        // In round 1, count face cards in upcard's suit
         for (const Card &card : hand) {
-            if (card.get_suit() == upcard.get_suit() && 
+            // Check if it's effectively a trump card using get_suit
+            if (card.get_suit(upcard.get_suit()) == upcard.get_suit() && 
                 card.is_face_or_ace()) {
                 trump_face_cards++;
             }
         }
-        // Order up if we have 2 or more high cards
         if (trump_face_cards >= 2) {
             order_up_suit = upcard.get_suit();
             return true;
         }
-    }
-    else { // round 2
+    } else {
         Suit next = Suit_next(upcard.get_suit());
-        // In round 2, count cards of next suit
         for (const Card &card : hand) {
-            if (card.get_suit() == next && 
+            if (card.get_suit(next) == next && 
                 card.is_face_or_ace()) {
                 trump_face_cards++;
             }
         }
-        // Order up if we have 1 or more high cards, or if we're the dealer
         if (trump_face_cards >= 1 || is_dealer) {
             order_up_suit = next;
             return true;
@@ -152,7 +147,7 @@ Card Simple::lead_card(Suit trump) {
     if (!found_non_trump) {
         for (size_t i = 1; i < hand.size(); ++i) {
             if (!Card_less(hand[i], hand[highest_index], trump)) {
-                highest_index = i;
+                highest_index = i; 
             }
         }
     }
@@ -164,10 +159,33 @@ Card Simple::lead_card(Suit trump) {
 }
 
 Card Simple::play_card(const Card &led_card, Suit trump) {
-    // Basic implementation - can be expanded later
-    Card card = hand.front();
-    hand.erase(hand.begin());
-    return card;
+    // Must follow suit if possible
+    size_t play_index = 0;
+    bool can_follow_suit = false;
+    
+    // First check if we can follow suit
+    for (size_t i = 0; i < hand.size(); ++i) {
+        if (hand[i].get_suit(trump) == led_card.get_suit(trump)) {
+            if (!can_follow_suit || Card_less(hand[play_index], hand[i], led_card, trump)) {
+                play_index = i;
+                can_follow_suit = true;
+            }
+        }
+    }
+    
+    // If we can't follow suit, play lowest card
+    if (!can_follow_suit) {
+        for (size_t i = 1; i < hand.size(); ++i) {
+            if (Card_less(hand[i], hand[play_index], led_card, trump)) {
+                play_index = i;
+            }
+        }
+    }
+    
+    // Remove and return the selected card
+    Card card_to_play = hand[play_index];
+    hand.erase(hand.begin() + play_index);
+    return card_to_play;
 }
 
 // Human class implementations

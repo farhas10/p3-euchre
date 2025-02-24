@@ -49,8 +49,8 @@ void Pack::shuffle() {
         std::array<Card, PACK_SIZE> temp = cards;
         
         // For a perfect in-shuffle:
-        // - Second half cards (13-24) go to even positions (0,2,4...)
-        // - First half cards (1-12) go to odd positions (1,3,5...)
+        // - Second half cards (12-23) go to even positions (0,2,4...)
+        // - First half cards (0-11) go to odd positions (1,3,5...)
         int mid = PACK_SIZE / 2;
         for (int i = 0; i < mid; i++) {
             // Cards from second half (index mid+i) go to even positions (2*i)

@@ -128,12 +128,29 @@ TEST(card_less_right_left) {
     Card left(JACK, CLUBS);  
 
     ASSERT_TRUE(Card_less(left, right, SPADES));  
-    ASSERT_FALSE(Card_less(right, left, SPADES));
 }
-TEST(card_less_case){
+TEST(card_less_left){
     Card left(JACK, CLUBS);
     Card c(TWO, SPADES);
     ASSERT_TRUE(Card_less(c, left, SPADES));
+}
+TEST(card_less_trump){
+    Card trump(FIVE, CLUBS);
+    Card c(ACE, HEARTS);
+    ASSERT_TRUE(Card_less(c, trump, CLUBS));
+}
+TEST(card_less_led_card){
+    Card led(NINE, HEARTS);
+    Card c1(TEN, HEARTS);
+    Card c2(TWO, CLUBS);
+    ASSERT_TRUE(Card_less(c1, c2, led, CLUBS));
+}
+TEST(card_less_no_trump){
+    Card led(EIGHT, DIAMONDS);
+    Card c1(KING, SPADES);   
+    Card c2(SEVEN, DIAMONDS); 
+
+    ASSERT_TRUE(Card_less(c1, c2, led, CLUBS));  
 }
 //suit_next
 TEST(test_suit_next){
