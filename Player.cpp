@@ -118,9 +118,11 @@ void Simple::add_and_discard(const Card &upcard) {
     hand.erase(hand.begin());
 }
 
+//When a Simple Player leads a trick, they play the highest non-trump card in their hand
+//If they have only trump cards, they play the highest trump card in their hand.
 Card Simple::lead_card(Suit trump) {
     std::sort(hand.begin(), hand.end());
-    
+
     // First try to find highest non-trump card
     for (int i = hand.size() - 1; i >= 0; i--) {
         if (!hand[i].is_trump(trump)) {
@@ -129,8 +131,8 @@ Card Simple::lead_card(Suit trump) {
             return card_to_play;
         }
     }
-    
-    // If only trump cards remain, check for right and left bowers
+
+    // Right bower
     for (int i = hand.size() - 1; i >= 0; i--) {
         if (hand[i].is_right_bower(trump)) {
             Card card_to_play = hand[i];
@@ -138,7 +140,8 @@ Card Simple::lead_card(Suit trump) {
             return card_to_play;
         }
     }
-    
+
+    // Left bower
     for (int i = hand.size() - 1; i >= 0; i--) {
         if (hand[i].is_left_bower(trump)) {
             Card card_to_play = hand[i];
@@ -146,8 +149,22 @@ Card Simple::lead_card(Suit trump) {
             return card_to_play;
         }
     }
-    
-    // Play highest remaining trump
+
+    // Highest trump card
+    int highest_trump_index = -1;
+    for (int i = hand.size() - 1; i >= 0; i--) {
+        if (hand[i].is_trump(trump)) {
+            if (highest_trump_index == -1 || hand[i] > hand[highest_trump_index]) {
+                highest_trump_index = i;  // Track highest trump card
+            }
+        }
+    }
+    if (highest_trump_index != -1) {
+        Card card_to_play = hand[highest_trump_index];
+        hand.erase(hand.begin() + highest_trump_index);
+        return card_to_play;
+    }
+
     Card card_to_play = hand.back();
     hand.pop_back();
     return card_to_play;
@@ -157,21 +174,35 @@ Card Simple::play_card(const Card &led_card, Suit trump) {
     std::sort(hand.begin(), hand.end());
     
     // Try to follow suit with highest card
+    int highest_i = -1;
     for (int i = hand.size() - 1; i >= 0; i--) {
-        if (hand[i].get_suit() == led_card.get_suit()) {
-            Card card_to_play = hand[i];
-            hand.erase(hand.begin() + i);
-            return card_to_play;
+        if (hand[i].get_suit(trump) == led_card.get_suit(trump)) { 
+            if (highest_i == -1 || hand[i] > hand[highest_i]) {
+                highest_i = i;
+            }
         }
+    }
+
+    if (highest_i != -1) {
+        Card card_to_play = hand[highest_i];
+        hand.erase(hand.begin() + highest_i);
+        return card_to_play;
     }
     
     // If can't follow suit, play lowest non-trump
-    for (size_t i = 0; i < hand.size(); i++) {
-        if (!hand[i].is_trump(trump)) {
-            Card card_to_play = hand[i];
-            hand.erase(hand.begin() + i);
-            return card_to_play;
+    int lowest_i = -1;
+    for (int i = 0; i < hand.size(); i++) {
+        if (!hand[i].is_trump(trump) || hand[i].is_right_bower(trump)) { 
+            if (lowest_i == -1 || hand[i] < hand[lowest_i]) {
+                lowest_i = i;
+            }
         }
+    }
+
+    if (lowest_i != -1) {
+        Card card_to_play = hand[lowest_i];
+        hand.erase(hand.begin() + lowest_i);
+        return card_to_play;
     }
     
     // If only trump remains, play lowest trump
