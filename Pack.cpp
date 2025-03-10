@@ -36,8 +36,9 @@ Pack::Pack(istream& pack_input) {
 }
 
 Card Pack::deal_one() {
-    assert(!empty());  // REQUIRES: cards remain in the Pack 
-    return cards[next++];
+    assert(next < PACK_SIZE);  // REQUIRES: cards remain in the Pack 
+    next++;
+    return cards[next - 1];
 }
 
 void Pack::reset() {

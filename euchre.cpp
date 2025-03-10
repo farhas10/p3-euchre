@@ -34,6 +34,13 @@ class Game{
 
 //Reads in data from terminal, parsing data into variables.
 int main(int argc, char **argv) {
+  // Print the executable and all arguments, ending with a space.
+  cout << argv[0];
+  for (int i = 1; i < argc; ++i) {
+    cout << " " << argv[i];
+  }
+  cout << " " << endl;
+  
   bool shuffle = false;
   
   if (argc != 12){
@@ -275,9 +282,10 @@ void Game::update_scores(const vector<int>& tricks_won){
 
 void Game::print_scores(){
   cout << players[0]->get_name() << " and " << players[2]->get_name() 
-         << " have " << this->scores[0] << " points" << endl;
-    cout << players[1]->get_name() << " and " << players[3]->get_name() 
-         << " have " << this->scores[1] << " points" << endl;
+  << " have " << this->scores[0] << " points" << endl;
+  cout << players[1]->get_name() << " and " << players[3]->get_name() 
+  << " have " << this->scores[1] << " points" << endl;
+  cout << endl;
 }
 
 void Game::print_winner(){

@@ -3,6 +3,8 @@
 #include <iostream>
 #include <algorithm>
 
+using namespace std;
+
 // Define concrete classes here in the .cpp file
 class Simple : public Player {
 private:
@@ -114,7 +116,14 @@ bool Simple::make_trump(const Card &upcard, bool is_dealer,
 void Simple::add_and_discard(const Card &upcard) {
     hand.push_back(upcard);
     std::sort(hand.begin(), hand.end());
-    // Remove lowest card (first card after sorting)
+    //try to discard a non-trump card
+    for (size_t i = 0; i < hand.size(); ++i) {
+        if (!hand[i].is_trump(upcard.get_suit())) {
+            hand.erase(hand.begin() + i);
+            return;
+        }
+    }
+    // If all cards are trump, discard the lowest trump.
     hand.erase(hand.begin());
 }
 
@@ -261,29 +270,67 @@ Card Human::card_from_input() const {
 }
 
 bool Human::make_trump(const Card &upcard, bool is_dealer,
-                      int round, Suit &order_up_suit) const {
-    // Basic implementation - can be expanded later
+    int round, Suit &order_up_suit) const {
+    print_hand();
+    cout << "Human player " << name << ", please enter a suit, or \"pass\": ";
+    string input;
+    cin >> input;
+    if (input == "pass") {
+    cout << name << " passes" << endl;
     return false;
+    }
+    if (input != "Hearts" && input != "Diamonds" &&
+    input != "Clubs" && input != "Spades") {
+    cout << "Invalid suit entered. " << name << " passes" << endl;
+    return false;
+    }
+    order_up_suit = string_to_suit(input);
+    cout << name << " orders up " << input << endl;
+    return true;
 }
 
 void Human::add_and_discard(const Card &upcard) {
     hand.push_back(upcard);
+    sort(hand.begin(), hand.end());
     print_hand();
-    // Basic implementation - can be expanded later
+    cout << "Discard upcard: [-1]" << endl;
+    cout << "Human player " << name << ", please select a card to discard: ";
+    int index;
+    cin >> index;
+    if (index < 0 || index >= static_cast<int>(hand.size())) {
+        cout << "Invalid index. Discarding the last card." << endl;
+        hand.pop_back();
+    } else {
+        hand.erase(hand.begin() + index);
+    }
+    cout << endl;
 }
 
 Card Human::lead_card(Suit trump) {
     print_hand();
-    // Basic implementation - can be expanded later
-    Card card = hand.front();
-    hand.erase(hand.begin());
+    cout << "Human player " << name << ", please select a card to lead: ";
+    int index;
+    cin >> index;
+    if (index < 0 || index >= static_cast<int>(hand.size())) {
+        cout << "Invalid selection. Playing the first card." << endl;
+        index = 0;
+    }
+    Card card = hand[index];
+    hand.erase(hand.begin() + index);
+    cout << card << " led by " << name << endl;
     return card;
 }
 
 Card Human::play_card(const Card &led_card, Suit trump) {
     print_hand();
-    // Basic implementation - can be expanded later
-    Card card = hand.front();
-    hand.erase(hand.begin());
+    cout << "Human player " << name << ", please select a card: ";
+    int index;
+    cin >> index;
+    if (index < 0 || index >= static_cast<int>(hand.size())) {
+        cout << "Invalid selection. Playing the first card." << std::endl;
+        index = 0;
+    }
+    Card card = hand[index];
+    hand.erase(hand.begin() + index);
     return card;
-} 
+}

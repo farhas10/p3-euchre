@@ -72,6 +72,7 @@ Suit string_to_suit(const std::string &str) {
   return static_cast<Suit>(-1);  // Return invalid suit
 }
 
+
 //EFFECTS Prints Suit to stream, for example "Spades"
 std::ostream & operator<<(std::ostream &os, Suit suit) {
   os << SUIT_NAMES[suit];
