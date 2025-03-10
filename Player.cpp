@@ -172,40 +172,67 @@ Card Simple::lead_card(Suit trump) {
 
 Card Simple::play_card(const Card &led_card, Suit trump) {
     std::sort(hand.begin(), hand.end());
-    
-    // Try to follow suit with highest card
+
+    //try to follow suit with the highest card
     int highest_i = -1;
-    for (int i = hand.size() - 1; i >= 0; i--) {
-        if (hand[i].get_suit(trump) == led_card.get_suit(trump)) { 
-            if (highest_i == -1 || hand[i] > hand[highest_i]) {
+    for (int i = 0; i < hand.size(); ++i) {
+        if (hand[i].get_suit(trump) == led_card.get_suit(trump) && !hand[i].is_left_bower(trump)) {
+            if (highest_i == -1 || hand[i] > hand[highest_i])
                 highest_i = i;
-            }
         }
     }
-
     if (highest_i != -1) {
         Card card_to_play = hand[highest_i];
         hand.erase(hand.begin() + highest_i);
         return card_to_play;
     }
-    
-    // If can't follow suit, play lowest non-trump
+
+    //if cannot follow suit, try to play the lowest non-trump card (avoiding bowers)
     int lowest_i = -1;
-    for (int i = 0; i < hand.size(); i++) {
-        if (!hand[i].is_trump(trump) || hand[i].is_right_bower(trump)) { 
-            if (lowest_i == -1 || hand[i] < hand[lowest_i]) {
+    for (int i = 0; i < hand.size(); ++i) {
+        if (!hand[i].is_trump(trump) && !hand[i].is_left_bower(trump) && !hand[i].is_right_bower(trump)) {
+            if (lowest_i == -1 || hand[i] < hand[lowest_i])
                 lowest_i = i;
-            }
         }
     }
-
     if (lowest_i != -1) {
         Card card_to_play = hand[lowest_i];
         hand.erase(hand.begin() + lowest_i);
         return card_to_play;
     }
-    
-    // If only trump remains, play lowest trump
+
+    //if only trump cards remain, try to find a non-bower trump card
+    int lowest_i_trump = -1;
+    for (int i = 0; i < hand.size(); ++i) {
+        if (hand[i].is_trump(trump) && !hand[i].is_left_bower(trump) && !hand[i].is_right_bower(trump)) {
+            if (lowest_i_trump == -1 || hand[i] < hand[lowest_i_trump])
+                lowest_i_trump = i;
+        }
+    }
+    if (lowest_i_trump != -1) {
+        Card card_to_play = hand[lowest_i_trump];
+        hand.erase(hand.begin() + lowest_i_trump);
+        return card_to_play;
+    }
+
+    //if no non-bower trump exists, then if the left bower is in hand, play it
+    for (int i = 0; i < hand.size(); ++i) {
+        if (hand[i].is_left_bower(trump)) {
+            Card card_to_play = hand[i];
+            hand.erase(hand.begin() + i);
+            return card_to_play;
+        }
+    }
+
+    //if needed, play any trump card (could be right bower)
+    for (int i = 0; i < hand.size(); ++i) {
+        if (hand[i].is_trump(trump)) {
+            Card card_to_play = hand[i];
+            hand.erase(hand.begin() + i);
+            return card_to_play;
+        }
+    }
+
     Card card_to_play = hand.front();
     hand.erase(hand.begin());
     return card_to_play;

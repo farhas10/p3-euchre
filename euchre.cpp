@@ -218,41 +218,41 @@ void Game::play_hand(){
   int leader = (dealer + 1) % 4;
 
   for (int trick = 0; trick < 5; trick++) {
-        vector<Card> trick_cards;
-        vector<int> trick_players;
+    vector<Card> trick_cards;
+    vector<int> trick_players;
 
-        //first player leads
-        Card led_card = players[leader]->lead_card(trump);
-        trick_cards.push_back(led_card);
-        trick_players.push_back(leader);
-        cout << led_card << " led by " << players[leader]->get_name() << endl;
+    //first player leads
+    Card led_card = players[leader]->lead_card(trump);
+    trick_cards.push_back(led_card);
+    trick_players.push_back(leader);
+    cout << led_card << " led by " << players[leader]->get_name() << endl;
 
-        //other players follow
-        for (int i = 1; i < 4; i++) {
-            int current_player = (leader + i) % 4;
-            Card played = players[current_player]->play_card(led_card, trump);
-            trick_cards.push_back(played);
-            trick_players.push_back(current_player);
-            cout << played << " played by " << players[current_player]->get_name() << endl;
-        }
-
-        //find trick winner
-        int winner_i = 0;
-        for (int i = 1; i < 4; i++) {
-            if (Card_less(trick_cards[winner_i], trick_cards[i], led_card, trump)) {
-                winner_i = i;
-            }
-        }
-
-        int winner = trick_players[winner_i];
-        cout << players[winner]->get_name() << " takes the trick" << endl;
-        cout << endl;
-
-        //update tricks won & winner leads next
-        tricks_won[winner % 2]++;
-        leader = winner;
+    //other players follow
+    for (int i = 1; i < 4; i++) {
+      int current_player = (leader + i) % 4;
+      Card played = players[current_player]->play_card(led_card, trump);
+      trick_cards.push_back(played);
+      trick_players.push_back(current_player);
+      cout << played << " played by " << players[current_player]->get_name() << endl;
     }
-    update_scores(tricks_won);
+
+    //find trick winner
+    int winner_i = 0;
+    for (int i = 1; i < 4; i++) {
+      if (Card_less(trick_cards[winner_i], trick_cards[i], led_card, trump)) {
+        winner_i = i;
+      }
+    }
+
+    int winner = trick_players[winner_i];
+    cout << players[winner]->get_name() << " takes the trick" << endl;
+    cout << endl;
+
+    //update tricks won & winner leads next
+    tricks_won[winner % 2]++;
+    leader = winner;
+  }
+  update_scores(tricks_won);
 }
 
 void Game::update_scores(const vector<int>& tricks_won){
