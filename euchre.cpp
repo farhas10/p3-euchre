@@ -20,8 +20,8 @@ class Game{
     void deal();
     void make_trump();
     void play_hand();
-    void print_scores(); //??
-    void print_winner(); //??
+    void print_scores();
+    void print_winner();    
 };
 
 //Reads in data from terminal, parsing data into variables.
@@ -102,6 +102,19 @@ void Game::set_players(const vector<Player*>& new_players){
     players = new_players;
   }
 
+void Game::shuffle(){
+  pack.shuffle();
+}
+
+void Game::deal(){
+  for (int i = 0; i < 5; i++){
+    for (int j = 0; j < 4; j++){
+      players[j]->add_card(pack.deal_one());
+    }
+  }
+}
+
+
 void Game::play(){
   int dealer = 0;
   //team 1 is players 0 & 2
@@ -109,7 +122,7 @@ void Game::play(){
   vector<int> scores(2,0);
 
   //loop until a team wins
-  while(/win/){
+  while(){
     cout << "Hand " << dealer << endl;
     cout << players[dealer]->get_name() << " deals" << endl;
     if(shuffle){
@@ -123,4 +136,3 @@ void Game::play(){
   }
   print_winner();
 }
-
