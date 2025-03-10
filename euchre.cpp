@@ -95,13 +95,12 @@ int main(int argc, char **argv) {
 }
 
 //Creates an instance of game.
-Game::Game(const string &pack_filename, bool shuffle_deck, int points, vector<Player*>& players){
-  ifstream file(pack_filename);
-  Pack pack(file);
-  if (shuffle_deck){
-    pack.shuffle();
-  }
-  set_players(players);
+Game::Game(const string &pack_filename, bool shuffle_deck, int points, vector<Player*>& players)
+    : pack(pack_filename), shuffle_deck(shuffle_deck), points_to_win(points), dealer(0), scores(2, 0) {
+    if (shuffle_deck) {
+        pack.shuffle();
+    }
+    set_players(players);
 }
 
 void Game::play(){
