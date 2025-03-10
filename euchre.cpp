@@ -97,6 +97,28 @@ Game::Game(const string &pack_filename, bool shuffle_deck, int points, vector<Pl
   set_players(players);
 }
 
+void Game::play(){
+  int dealer = 0;
+  //team 1 is players 0 & 2
+  //team 2 is players 1 & 3
+  vector<int> scores(2,0);
+
+  //loop until a team wins
+  while(scores[0] < points_to_win && scores[1] < points_to_win){
+    cout << "Hand " << dealer << endl;
+    cout << players[dealer]->get_name() << " deals" << endl;
+    if(shuffle){
+      shuffle();
+    }
+    deal();
+    make_trump();
+    play_hand();
+    print_scores(scores);
+    dealer = (dealer + 1) % 4;
+  }
+  print_winner();
+}
+
 //Accesses the private player vector to set the new variables.
 void Game::set_players(const vector<Player*>& new_players){
     players = new_players;
@@ -114,25 +136,40 @@ void Game::deal(){
   }
 }
 
+void Game::make_trump(){
+  //propose a trump suit
+  Card potential_trump = pack.deal_one();
+  cout << potential_trump << " turned up" << endl;
+  Suit trump;
+  bool trump_chosen = false;
 
-void Game::play(){
-  int dealer = 0;
-  //team 1 is players 0 & 2
-  //team 2 is players 1 & 3
-  vector<int> scores(2,0);
+  //players decide if they want that trump
+  for(int i = 0; i < 3; ++i){
+    int current_player = (dealer + i) % 4;
+    bool is_dealer = (current_player == dealer);
 
-  //loop until a team wins
-  while(){
-    cout << "Hand " << dealer << endl;
-    cout << players[dealer]->get_name() << " deals" << endl;
-    if(shuffle){
-      shuffle();
+    if(players[current_player]->make_trump(potential_trump, is_dealer, 1, trump)){
+      
     }
-    deal();
-    make_trump();
-    play_hand();
-    print_scores(scores);
-    dealer = (dealer + 1) % 4;
   }
-  print_winner();
+
+  //players decide if they want to pick trump suit
 }
+
+void Game::play_hand(){
+
+}
+
+void Game::print_scores(){
+
+}
+
+void Game::print_winner(){
+
+}
+
+
+
+
+
+
