@@ -14,10 +14,18 @@ class Game{
 
   private:
     Pack pack;
+    vector<Player*> players;
+    void set_players(const vector<Player*>& new_players);
+    void shuffle();
+    void deal();
+    void make_trump();
+    void play_hand();
+    void print_scores(); //??
+    void print_winner(); //??
 };
 
-int main(int argc, char* argv[]) {
-  vector<Player*> players;
+//Reads in data from terminal, parsing data into variables.
+int main(int argc, char **argv) {
   bool shuffle = false;
   
   if (argc != 12){
@@ -57,7 +65,7 @@ int main(int argc, char* argv[]) {
             "POINTS_TO_WIN NAME1 TYPE1 NAME2 TYPE2 NAME3 TYPE3 NAME4 TYPE4" << endl;
     return 1;
   }
-
+  vector<Player*> players;
   for (int i = 4; i < argc; i += 2){
     string name = argv[i];
     string type = argv[i + 1];
@@ -79,9 +87,40 @@ int main(int argc, char* argv[]) {
   game.play();
 }
 
+//Creates an instance of game.
 Game::Game(const string &pack_filename, bool shuffle_deck, int points, vector<Player*>& players){
-  
+  ifstream file(pack_filename);
+  Pack pack(file);
+  if (shuffle_deck){
+    pack.shuffle();
+  }
+  set_players(players);
 }
 
+//Accesses the private player vector to set the new variables.
+void Game::set_players(const vector<Player*>& new_players){
+    players = new_players;
+  }
+
 void Game::play(){
-};
+  int dealer = 0;
+  //team 1 is players 0 & 2
+  //team 2 is players 1 & 3
+  vector<int> scores(2,0);
+
+  //loop until a team wins
+  while(/win/){
+    cout << "Hand " << dealer << endl;
+    cout << players[dealer]->get_name() << " deals" << endl;
+    if(shuffle){
+      shuffle();
+    }
+    deal();
+    make_trump();
+    play_hand();
+    print_scores(scores);
+    dealer = (dealer + 1) % 4;
+  }
+  print_winner();
+}
+
