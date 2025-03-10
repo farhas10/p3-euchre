@@ -11,6 +11,7 @@ class Game{
   public:
     Game(const string &pack_filename, bool shuffle_deck, int points, vector<Player*>& players);
     void play();
+    const vector<Player*>& get_players() const;
 
   private:
     Pack pack;
@@ -18,7 +19,7 @@ class Game{
     Suit trump;
     int points_to_win; 
     int dealer;
-    vector <int> scores;
+    vector<int> scores;
     bool shuffle_deck;
 
     void set_players(const vector<Player*>& new_players);
@@ -41,15 +42,10 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  
   string pack_filename = argv[1];
   ifstream file(pack_filename);
 
-  if (file.is_open()){
-    Pack pack(file);
-  }
-
-  else{
+  if (!file) {
     cout << "Error opening file" << endl;
     return 1;
   }
@@ -67,11 +63,12 @@ int main(int argc, char **argv) {
   }
 
   int points_to_win = stoi(argv[3]);
-  if(!(points_to_win > 0 &&  points_to_win <= 100)){
+  if(!(points_to_win > 0 && points_to_win <= 100)){
     cout << "Usage: euchre.exe PACK_FILENAME [shuffle|noshuffle] "
             "POINTS_TO_WIN NAME1 TYPE1 NAME2 TYPE2 NAME3 TYPE3 NAME4 TYPE4" << endl;
     return 1;
   }
+
   vector<Player*> players;
   for (int i = 4; i < argc; i += 2){
     string name = argv[i];
@@ -95,20 +92,22 @@ int main(int argc, char **argv) {
 }
 
 //Creates an instance of game.
-Game::Game(const string &pack_filename, bool shuffle_deck, int points, vector<Player*>& players)
-    : pack(pack_filename), shuffle_deck(shuffle_deck), points_to_win(points), dealer(0), scores(2, 0) {
-    if (shuffle_deck) {
-        pack.shuffle();
+Game::Game(const string &pack_filename, bool shuffle_setting, int points, vector<Player*>& players)
+    : pack(), players(players), points_to_win(points), dealer(0), scores(2, 0), shuffle_deck(shuffle_setting) {  
+    ifstream file(pack_filename);
+    if (!file) {
+        cerr << "Error opening file: " << pack_filename << endl;
+        exit(1);
     }
-    set_players(players);
+
+    pack = Pack(file);  
+
+    if (shuffle_deck) {
+        pack.shuffle();  
+    }
 }
 
 void Game::play(){
-  int dealer = 0;
-  //team 1 is players 0 & 2
-  //team 2 is players 1 & 3
-  //vector<int> scores(2,0);
-
   //loop until a team wins
   while(this->scores[0] < this->points_to_win && this->scores[1] < this->points_to_win){
     cout << "Hand " << dealer << endl;
@@ -128,7 +127,7 @@ void Game::play(){
 //Accesses the private player vector to set the new variables.
 void Game::set_players(const vector<Player*>& new_players){
     players = new_players;
-  }
+}
 
 void Game::shuffle(){
   pack.shuffle();
@@ -253,4 +252,9 @@ void Game::print_winner(){
     } else {
         cout << players[1]->get_name() << " and " << players[3]->get_name() << " win!" << endl;
     }
+}
+
+// Getter method implementation
+const vector<Player*>& Game::get_players() const {
+  return players;
 }
