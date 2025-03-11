@@ -314,7 +314,7 @@ void Game::print_scores(){
 }
 
 void Game::print_winner(){
-  cout << endl;  // Extra newline before winner
+  //cout << endl;  // Extra newline before winner
   if (scores[0] >= this->points_to_win) {
     cout << players[0]->get_name() << " and " << players[2]->get_name() << " win!" << endl;
   } else {
