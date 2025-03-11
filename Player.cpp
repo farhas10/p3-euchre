@@ -250,12 +250,13 @@ Card Simple::play_card(const Card &led_card, Suit trump) {
 // Human class implementations
 Human::Human(const std::string &name_in) : name(name_in) {}
 
-const std::string & Human::get_name() const {
+const string & Human::get_name() const {
     return name;
 }
 
 void Human::add_card(const Card &c) {
     hand.push_back(c);
+    sort(hand.begin(), hand.end());
 }
 
 void Human::print_hand() const {
@@ -271,66 +272,106 @@ Card Human::card_from_input() const {
 
 bool Human::make_trump(const Card &upcard, bool is_dealer,
     int round, Suit &order_up_suit) const {
-    print_hand();
-    cout << "Human player " << name << ", please enter a suit, or \"pass\": ";
+    // Print player's hand
+    for (size_t i = 0; i < hand.size(); ++i) {
+        cout << "Human player " << name << "'s hand: "
+             << "[" << i << "] " << hand[i] << "\n";
+    }
+    
+    // Prompt for decision
+    cout << "Human player " << name 
+         << ", please enter a suit, or \"pass\":" << endl;
+    
     string input;
     cin >> input;
+    
     if (input == "pass") {
-    cout << name << " passes" << endl;
-    return false;
+        return false;
     }
-    if (input != "Hearts" && input != "Diamonds" &&
-    input != "Clubs" && input != "Spades") {
-    cout << "Invalid suit entered. " << name << " passes" << endl;
-    return false;
+    
+    if (input == "Spades" || input == "Hearts" || 
+        input == "Clubs" || input == "Diamonds") {
+        order_up_suit = string_to_suit(input);
+        return true;
     }
-    order_up_suit = string_to_suit(input);
-    cout << name << " orders up " << input << endl;
-    return true;
+    
+    return false;
 }
 
 void Human::add_and_discard(const Card &upcard) {
+    // Print current hand
+    for (size_t i = 0; i < hand.size(); ++i) {
+        cout << "Human player " << name << "'s hand: "
+             << "[" << i << "] " << hand[i] << "\n";
+    }
+    
+    // Add upcard
     hand.push_back(upcard);
-    sort(hand.begin(), hand.end());
-    print_hand();
+    
+    // Show discard option
     cout << "Discard upcard: [-1]" << endl;
-    cout << "Human player " << name << ", please select a card to discard: ";
+    
+    // Prompt for discard
+    cout << "Human player " << name 
+         << ", please select a card to discard:";
+    
     int index;
     cin >> index;
-    if (index < 0 || index >= static_cast<int>(hand.size())) {
-        cout << "Invalid index. Discarding the last card." << endl;
-        hand.pop_back();
-    } else {
+    
+    // Handle discard
+    if (index >= 0 && index < static_cast<int>(hand.size())) {
         hand.erase(hand.begin() + index);
+    } else {
+        hand.pop_back(); // Discard the upcard
     }
+    
     cout << endl;
 }
 
 Card Human::lead_card(Suit trump) {
-    print_hand();
-    cout << "Human player " << name << ", please select a card to lead: ";
+    // Print current hand
+    for (size_t i = 0; i < hand.size(); ++i) {
+        cout << "Human player " << name << "'s hand: "
+             << "[" << i << "] " << hand[i] << "\n";
+    }
+    
+    // Prompt for card selection
+    cout << "Human player " << name 
+         << ", please select a card:" << endl;
+    
     int index;
     cin >> index;
+    
+    // Handle invalid input
     if (index < 0 || index >= static_cast<int>(hand.size())) {
-        cout << "Invalid selection. Playing the first card." << endl;
         index = 0;
     }
-    Card card = hand[index];
+    
+    Card card_to_play = hand[index];
     hand.erase(hand.begin() + index);
-    cout << card << " led by " << name << endl;
-    return card;
+    return card_to_play;
 }
 
 Card Human::play_card(const Card &led_card, Suit trump) {
-    print_hand();
-    cout << "Human player " << name << ", please select a card: ";
+    // Print current hand
+    for (size_t i = 0; i < hand.size(); ++i) {
+        cout << "Human player " << name << "'s hand: "
+             << "[" << i << "] " << hand[i] << "\n";
+    }
+    
+    // Prompt for card selection
+    cout << "Human player " << name 
+         << ", please select a card:" << endl;
+    
     int index;
     cin >> index;
+    
+    // Handle invalid input
     if (index < 0 || index >= static_cast<int>(hand.size())) {
-        cout << "Invalid selection. Playing the first card." << std::endl;
         index = 0;
     }
-    Card card = hand[index];
+    
+    Card card_to_play = hand[index];
     hand.erase(hand.begin() + index);
-    return card;
+    return card_to_play;
 }

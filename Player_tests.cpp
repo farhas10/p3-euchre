@@ -395,9 +395,10 @@ TEST(test_simple_player_play_card_follows_suit_play_all_different_play_out) {
  
     ASSERT_EQUAL(p->play_card(led_card, HEARTS), Card(TEN, SPADES));
     ASSERT_EQUAL(p->play_card(led_card, HEARTS), Card(QUEEN, DIAMONDS));
-    ASSERT_EQUAL(p->play_card(led_card, HEARTS), Card(JACK, HEARTS));
     ASSERT_EQUAL(p->play_card(led_card, HEARTS), Card(ACE, HEARTS));
+    ASSERT_EQUAL(p->play_card(led_card, HEARTS), Card(JACK, HEARTS));
 
+//Switched 398 and 399
     delete p;
 }
 
@@ -412,10 +413,10 @@ TEST(test_simple_player_play_card_first) {
     p->add_and_discard(Card(JACK, HEARTS));
      
     ASSERT_EQUAL(p->play_card(Card(NINE, CLUBS), HEARTS), Card(TEN, HEARTS));
-    ASSERT_EQUAL(p->play_card(Card(NINE, CLUBS), HEARTS), Card(JACK, HEARTS));
-    ASSERT_EQUAL(p->play_card(Card(NINE, CLUBS), HEARTS), Card(QUEEN, HEARTS));
-    ASSERT_EQUAL(p->play_card(Card(NINE, CLUBS), HEARTS), Card(KING, HEARTS));
-    ASSERT_EQUAL(p->play_card(Card(NINE, CLUBS), HEARTS), Card(ACE, HEARTS));
+    ASSERT_EQUAL(p->play_card(Card(NINE, CLUBS), HEARTS), Card(QUEEN, HEARTS)); // was queen
+    ASSERT_EQUAL(p->play_card(Card(NINE, CLUBS), HEARTS), Card(KING, HEARTS)); // was queen
+    ASSERT_EQUAL(p->play_card(Card(NINE, CLUBS), HEARTS), Card(ACE, HEARTS)); // was jack
+    ASSERT_EQUAL(p->play_card(Card(NINE, CLUBS), HEARTS), Card(JACK, HEARTS)); // was jack
 
     delete p;
 }
@@ -431,10 +432,10 @@ TEST(test_simple_player_play_card_last) {
     p->add_and_discard(Card(ACE, HEARTS));
      
     ASSERT_EQUAL(p->play_card(Card(NINE, CLUBS), HEARTS), Card(TEN, HEARTS));
-    ASSERT_EQUAL(p->play_card(Card(NINE, CLUBS), HEARTS), Card(JACK, HEARTS));
-    ASSERT_EQUAL(p->play_card(Card(NINE, CLUBS), HEARTS), Card(QUEEN, HEARTS));
-    ASSERT_EQUAL(p->play_card(Card(NINE, CLUBS), HEARTS), Card(KING, HEARTS));
-    ASSERT_EQUAL(p->play_card(Card(NINE, CLUBS), HEARTS), Card(ACE, HEARTS));
+    ASSERT_EQUAL(p->play_card(Card(NINE, CLUBS), HEARTS), Card(QUEEN, HEARTS)); // was jack
+    ASSERT_EQUAL(p->play_card(Card(NINE, CLUBS), HEARTS), Card(KING, HEARTS)); // was queen
+    ASSERT_EQUAL(p->play_card(Card(NINE, CLUBS), HEARTS), Card(ACE, HEARTS)); // was king
+    ASSERT_EQUAL(p->play_card(Card(NINE, CLUBS), HEARTS), Card(JACK, HEARTS)); // was ace
 
     delete p;
 }
@@ -509,7 +510,9 @@ TEST(test_add_discard_left_bower_consideration) {
     
     // Verify NINE of DIAMONDS was discarded by playing all cards
     Card led_card(ACE, DIAMONDS);
-    ASSERT_EQUAL(p->play_card(led_card, HEARTS), Card(JACK, DIAMONDS));
+    ASSERT_EQUAL(p->play_card(led_card, HEARTS), Card(ACE, CLUBS));
+
+    //Jack of Diamonds.
     delete p;
 }
 
