@@ -184,12 +184,26 @@ Card Simple::play_card(const Card &led_card, Suit trump) {
 
     //try to follow suit with the highest card
     int highest_i = -1;
-    for (int i = 0; i < hand.size(); ++i) {
-        if (hand[i].get_suit(trump) == led_card.get_suit(trump) && !hand[i].is_left_bower(trump)) {
-            if (highest_i == -1 || hand[i] > hand[highest_i])
+   for (int i = 0; i < hand.size(); ++i) {
+        if (hand[i].get_suit(trump) == led_card.get_suit(trump)) {
+            if (highest_i == -1) {
                 highest_i = i;
+            } else {
+                if (hand[i].is_right_bower(trump)) {
+                    highest_i = i;
+                } 
+                else if (hand[i].is_left_bower(trump)) {
+                    if (!hand[highest_i].is_right_bower(trump) && !hand[highest_i].is_left_bower(trump)) {
+                        highest_i = i;
+                    }
+                }   
+                else if (!hand[highest_i].is_right_bower(trump) && !hand[highest_i].is_left_bower(trump) && hand[i] > hand[highest_i]) {
+                    highest_i = i;
+                }
+            }
         }
-    }
+    }   
+
     if (highest_i != -1) {
         Card card_to_play = hand[highest_i];
         hand.erase(hand.begin() + highest_i);
