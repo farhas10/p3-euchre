@@ -19,8 +19,10 @@ class Game{
     Suit trump;
     int points_to_win; 
     int dealer;
+    int hand;
     vector<int> scores;
     bool shuffle_deck;
+    int trump_team;
 
     void set_players(const vector<Player*>& new_players);
     void shuffle();
@@ -113,7 +115,7 @@ Game::Game(const string &pack_filename, bool shuffle_setting, int points, vector
 void Game::play(){
   //loop until a team wins
   while(this->scores[0] < this->points_to_win && this->scores[1] < this->points_to_win){
-    cout << "Hand " << dealer << endl;
+    cout << "Hand " << hand << endl;
     cout << players[dealer]->get_name() << " deals" << endl;
     
     if(shuffle_deck) {
@@ -127,6 +129,7 @@ void Game::play(){
     play_hand();
     print_scores();
     dealer = (dealer + 1) % 4;
+    hand++;
   }
   print_winner();
 }
@@ -216,6 +219,7 @@ void Game::make_trump(){
     
     if(players[current_player]->make_trump(upcard, is_dealer, 1, trump)) {
       cout << players[current_player]->get_name() << " orders up " << trump << endl;
+      trump_team = current_player % 2;
       players[dealer]->add_and_discard(upcard);
       trump_chosen = true;
       cout << endl;  // Extra newline after making trump
@@ -233,6 +237,7 @@ void Game::make_trump(){
       
       if(players[current_player]->make_trump(upcard, is_dealer, 2, trump)) {
         cout << players[current_player]->get_name() << " orders up " << trump << endl;
+        trump_team = current_player % 2;
         cout << endl;
         break;
       } else {
@@ -240,6 +245,7 @@ void Game::make_trump(){
         if(is_dealer) {
           trump = Suit_next(upcard.get_suit());
           cout << players[dealer]->get_name() << " must order up " << trump << endl;
+          trump_team = dealer % 2;
           cout << endl;
         }
       }
@@ -281,21 +287,21 @@ void Game::play_hand(){
 }
 
 void Game::update_scores(const vector<int>& tricks_won){
-  int trump_team = (dealer + 1) % 2;
+  //cout << trump_team << endl;
   if (tricks_won[trump_team] >= 3) {
     cout << players[trump_team]->get_name() << " and " 
          << players[trump_team + 2]->get_name() << " win the hand" << endl;
     if(tricks_won[trump_team] == 5) {
-      cout << "march!" << endl;
       scores[trump_team] += 2;
+      cout << "march!" << endl;
     } else {
       scores[trump_team] += 1;
     }
   } else {
     cout << players[1 - trump_team]->get_name() << " and " 
          << players[(1 - trump_team) + 2]->get_name() << " win the hand" << endl;
-    cout << "euchred!" << endl;
     scores[1 - trump_team] += 2;
+    cout << "euchred!" << endl;
   }
 }
 
