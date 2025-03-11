@@ -35,13 +35,12 @@ public:
     virtual const std::string & get_name() const override;
     virtual void add_card(const Card &c) override;
     virtual bool make_trump(const Card &upcard, bool is_dealer,
-                          int round, Suit &order_up_suit) const override;
+                    int round, Suit &order_up_suit) const override;
     virtual void add_and_discard(const Card &upcard) override;
     virtual Card lead_card(Suit trump) override;
     virtual Card play_card(const Card &led_card, Suit trump) override;
     void print_hand() const;
     Card card_from_input() const;
-};
 
 // Factory function implementation
 Player * Player_factory(const std::string &name, const std::string &strategy) {
@@ -193,11 +192,13 @@ Card Simple::play_card(const Card &led_card, Suit trump) {
                     highest_i = i;
                 } 
                 else if (hand[i].is_left_bower(trump)) {
-                    if (!hand[highest_i].is_right_bower(trump) && !hand[highest_i].is_left_bower(trump)) {
+                    if (!hand[highest_i].is_right_bower(trump) 
+                    && !hand[highest_i].is_left_bower(trump)) {
                         highest_i = i;
                     }
                 }   
-                else if (!hand[highest_i].is_right_bower(trump) && !hand[highest_i].is_left_bower(trump) && hand[i] > hand[highest_i]) {
+                else if (!hand[highest_i].is_right_bower(trump) 
+                && !hand[highest_i].is_left_bower(trump) && hand[i] > hand[highest_i]) {
                     highest_i = i;
                 }
             }
@@ -213,7 +214,8 @@ Card Simple::play_card(const Card &led_card, Suit trump) {
     //if cannot follow suit, try to play the lowest non-trump card (avoiding bowers)
     int lowest_i = -1;
     for (int i = 0; i < hand.size(); ++i) {
-        if (!hand[i].is_trump(trump) && !hand[i].is_left_bower(trump) && !hand[i].is_right_bower(trump)) {
+        if (!hand[i].is_trump(trump) && !hand[i].is_left_bower(trump) 
+        && !hand[i].is_right_bower(trump)) {
             if (lowest_i == -1 || hand[i] < hand[lowest_i])
                 lowest_i = i;
         }
@@ -227,7 +229,8 @@ Card Simple::play_card(const Card &led_card, Suit trump) {
     //if only trump cards remain, try to find a non-bower trump card
     int lowest_i_trump = -1;
     for (int i = 0; i < hand.size(); ++i) {
-        if (hand[i].is_trump(trump) && !hand[i].is_left_bower(trump) && !hand[i].is_right_bower(trump)) {
+        if (hand[i].is_trump(trump) && !hand[i].is_left_bower(trump) 
+        && !hand[i].is_right_bower(trump)) {
             if (lowest_i_trump == -1 || hand[i] < hand[lowest_i_trump])
                 lowest_i_trump = i;
         }

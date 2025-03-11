@@ -9,7 +9,8 @@ using namespace std;
 
 class Game{
   public:
-    Game(const string &pack_filename, bool shuffle_deck, int points, vector<Player*>& players);
+    Game(const string &pack_filename, bool shuffle_deck, int points, 
+      vector<Player*>& players);
     void play();
     const vector<Player*>& get_players() const;
 
@@ -101,8 +102,10 @@ int main(int argc, char **argv) {
 }
 
 //Creates an instance of game.
-Game::Game(const string &pack_filename, bool shuffle_setting, int points, vector<Player*>& players)
-    : pack(), players(players), points_to_win(points), dealer(0), scores(2, 0), shuffle_deck(shuffle_setting) {  
+Game::Game(const string &pack_filename, bool shuffle_setting, int points, 
+  vector<Player*>& players)
+    : pack(), players(players), points_to_win(points), dealer(0), 
+    scores(2, 0), shuffle_deck(shuffle_setting) {  
     ifstream file(pack_filename);
     if (!file) {
         cerr << "Error opening file: " << pack_filename << endl;
@@ -316,9 +319,11 @@ void Game::print_scores(){
 void Game::print_winner(){
   //cout << endl;  // Extra newline before winner
   if (scores[0] >= this->points_to_win) {
-    cout << players[0]->get_name() << " and " << players[2]->get_name() << " win!" << endl;
+    cout << players[0]->get_name() << " and " << players[2]->get_name() << " win!" << 
+    endl;
   } else {
-    cout << players[1]->get_name() << " and " << players[3]->get_name() << " win!" << endl;
+    cout << players[1]->get_name() << " and " << players[3]->get_name() << " win!" << 
+    endl;
   }
 }
 
