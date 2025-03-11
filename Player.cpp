@@ -367,6 +367,7 @@ Card Human::lead_card(Suit trump) {
 }
 
 Card Human::play_card(const Card &led_card, Suit trump) {
+    std::sort(hand.begin(), hand.end());
     // Print current hand
     for (size_t i = 0; i < hand.size(); ++i) {
         cout << "Human player " << name << "'s hand: "
