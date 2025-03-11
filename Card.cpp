@@ -189,20 +189,21 @@ bool operator<(const Card &lhs, const Card &rhs){
     return true;
   }
   if (lhs.get_rank() == rhs.get_rank()){
-    return lhs.get_suit() > rhs.get_suit();
+    return lhs.get_suit() < rhs.get_suit();
   }
   return false;
 }
 
 //bool operator<=(const Card &lhs, const Card &rhs)
 bool operator<=(const Card &lhs, const Card &rhs){
-  if (lhs.get_rank() < rhs.get_rank()){
+  /*if (lhs.get_rank() < rhs.get_rank()){
     return true;
   }
   if (lhs.get_rank() == rhs.get_rank()){
-    return lhs.get_suit() >= rhs.get_suit();
+    return lhs.get_suit() <= rhs.get_suit();
   }
-  return false;
+  return false;*/
+  return !(lhs > rhs);
 }
 
 //bool operator>(const Card &lhs, const Card &rhs)
@@ -211,20 +212,21 @@ bool operator>(const Card &lhs, const Card &rhs){
     return true;
   }
   if (lhs.get_rank() == rhs.get_rank()){
-    return lhs.get_suit() < rhs.get_suit();
+    return lhs.get_suit() > rhs.get_suit();
   }
   return false;
 }
 
 //bool operator>=(const Card &lhs, const Card &rhs)
 bool operator>=(const Card &lhs, const Card &rhs){
-  if (lhs.get_rank() > rhs.get_rank()){
+  /*if (lhs.get_rank() > rhs.get_rank()){
     return true;
   }
   if (lhs.get_rank() == rhs.get_rank()){
-    return lhs.get_suit() <= rhs.get_suit();
+    return lhs.get_suit() >= rhs.get_suit();
   }
-  return false;
+  return false;*/
+  return !(lhs < rhs);
 }
 
 //bool operator==(const Card &lhs, const Card &rhs)

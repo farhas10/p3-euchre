@@ -108,10 +108,6 @@ Game::Game(const string &pack_filename, bool shuffle_setting, int points, vector
     }
 
     pack = Pack(file);  
-
-    if (shuffle_deck) {
-        pack.shuffle();  
-    }
 }
 
 void Game::play(){
@@ -119,10 +115,12 @@ void Game::play(){
   while(this->scores[0] < this->points_to_win && this->scores[1] < this->points_to_win){
     cout << "Hand " << dealer << endl;
     cout << players[dealer]->get_name() << " deals" << endl;
-    if(shuffle_deck){
+    
+    if(shuffle_deck) {
       shuffle();
+    } else{
+      pack.reset(); 
     }
-    pack.reset();
 
     deal();
     make_trump();

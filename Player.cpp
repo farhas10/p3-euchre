@@ -245,7 +245,7 @@ Card Simple::play_card(const Card &led_card, Suit trump) {
     Card card_to_play = hand.front();
     hand.erase(hand.begin());
     return card_to_play;
-}
+} 
 
 // Human class implementations
 Human::Human(const std::string &name_in) : name(name_in) {}
