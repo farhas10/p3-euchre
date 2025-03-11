@@ -120,7 +120,7 @@ void Game::play(){
     cout << "Hand " << dealer << endl;
     cout << players[dealer]->get_name() << " deals" << endl;
     if(shuffle_deck){
-      
+      shuffle();
     }
     pack.reset();
 
