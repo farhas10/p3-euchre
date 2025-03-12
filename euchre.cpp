@@ -13,6 +13,7 @@ class Game{
       vector<Player*>& players);
     void play();
     const vector<Player*>& get_players() const;
+    
 
   private:
     Pack pack;
@@ -35,6 +36,9 @@ class Game{
     void print_winner();    
 };
 
+string err_msg = "Usage: euchre.exe PACK_FILENAME [shuffle|noshuffle] ";
+string err_msg2 = "POINTS_TO_WIN NAME1 TYPE1 NAME2 TYPE2 NAME3 TYPE3 NAME4 TYPE4";
+
 //Reads in data from terminal, parsing data into variables.
 int main(int argc, char **argv) {
   // Print the executable and all arguments, ending with a space.
@@ -47,8 +51,7 @@ int main(int argc, char **argv) {
   bool shuffle = false;
   
   if (argc != 12){
-    cout << "Usage: euchre.exe PACK_FILENAME [shuffle|noshuffle] "
-            "POINTS_TO_WIN NAME1 TYPE1 NAME2 TYPE2 NAME3 TYPE3 NAME4 TYPE4" << endl;
+    cout << err_msg << err_msg2 << endl;
     return 1;
   }
 
@@ -63,19 +66,15 @@ int main(int argc, char **argv) {
   if (argv[2] == string("shuffle")){
     shuffle = true;
   }
-  else if (argv[2] == string("noshuffle")){
-    shuffle = false;
-  }
-  else{
-    cout << "Usage: euchre.exe PACK_FILENAME [shuffle|noshuffle] "
-            "POINTS_TO_WIN NAME1 TYPE1 NAME2 TYPE2 NAME3 TYPE3 NAME4 TYPE4" << endl;
+ 
+  else if (argv[2] != string("shuffle") && argv[2] != string("noshuffle")){
+    cout << err_msg << err_msg2 << endl;
     return 1;
   }
 
   int points_to_win = stoi(argv[3]);
   if(!(points_to_win > 0 && points_to_win <= 100)){
-    cout << "Usage: euchre.exe PACK_FILENAME [shuffle|noshuffle] "
-            "POINTS_TO_WIN NAME1 TYPE1 NAME2 TYPE2 NAME3 TYPE3 NAME4 TYPE4" << endl;
+    cout << err_msg << err_msg2 << endl;
     return 1;
   }
 
@@ -92,8 +91,7 @@ int main(int argc, char **argv) {
       players.push_back(player);
     }
     else{
-      cout << "Usage: euchre.exe PACK_FILENAME [shuffle|noshuffle] "
-              "POINTS_TO_WIN NAME1 TYPE1 NAME2 TYPE2 NAME3 TYPE3 NAME4 TYPE4" << endl;
+      cout << err_msg << err_msg2 << endl;
       return 1;
     }
   }

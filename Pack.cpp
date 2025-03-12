@@ -50,7 +50,7 @@ void Pack::reset() {
   //          https://en.wikipedia.org/wiki/In_shuffle.
 void Pack::shuffle() {
     for (int shuffle_count = 0; shuffle_count < 7; shuffle_count++) {
-        std::array<Card, PACK_SIZE> temp = cards;
+        array<Card, PACK_SIZE> temp = cards;
         
         // For a perfect in-shuffle:
         // - Second half cards (12-23) go to even positions (0,2,4...)

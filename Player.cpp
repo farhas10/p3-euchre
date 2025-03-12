@@ -8,11 +8,11 @@ using namespace std;
 // Define concrete classes here in the .cpp file
 class Simple : public Player {
 private:
-    std::string name;
-    std::vector<Card> hand;
+    string name;
+    vector<Card> hand;
 public:
-    Simple(const std::string &name_in);
-    virtual const std::string & get_name() const override;
+    Simple(const string &name_in);
+    virtual const string & get_name() const override;
 
     virtual void add_card(const Card &c) override;
 
@@ -26,10 +26,10 @@ public:
     virtual Card play_card(const Card &led_card, Suit trump) override;
 
     // Helper method to find cards that follow the led suit
-    std::vector<int> find_following_suit_cards(const Card &led_card, Suit trump) const;
+    vector<int> find_following_suit_cards(const Card &led_card, Suit trump) const;
 
     // Helper method to find the best card among those that follow suit
-    int find_best_following_suit_card(const std::vector<int> &indices, Suit trump) const;
+    int find_best_following_suit_card(const vector<int> &indices, Suit trump) const;
 
     // Helper method to find the lowest non-trump card
     int find_lowest_non_trump_card(Suit trump) const;
@@ -49,11 +49,11 @@ public:
 
 class Human : public Player {
 private:
-    std::string name;
-    std::vector<Card> hand;
+    string name;
+    vector<Card> hand;
 public:
-    Human(const std::string &name_in);
-    virtual const std::string & get_name() const override;
+    Human(const string &name_in);
+    virtual const string & get_name() const override;
     virtual void add_card(const Card &c) override;
     virtual bool make_trump(const Card &upcard, bool is_dealer,
                           int round, Suit &order_up_suit) const override;
@@ -62,11 +62,11 @@ public:
     virtual Card play_card(const Card &led_card, Suit trump) override;
     void print_hand() const;
     Card card_from_input() const;
-    Card select_card_from_hand(const std::string &prompt);
+    Card select_card_from_hand(const string &prompt);
 };
 
 // Factory function implementation
-Player * Player_factory(const std::string &name, const std::string &strategy) {
+Player * Player_factory(const string &name, const string &strategy) {
     if (strategy == "Simple") {
         return new Simple(name);
     }
@@ -80,22 +80,22 @@ Player * Player_factory(const std::string &name, const std::string &strategy) {
 }
 
 // Output operator implementation
-std::ostream & operator<<(std::ostream &os, const Player &p) {
+ostream & operator<<(ostream &os, const Player &p) {
     os << p.get_name();
     return os;
 }
 
 // Simple class implementations
-Simple::Simple(const std::string &name_in) : name(name_in) {}
+Simple::Simple(const string &name_in) : name(name_in) {}
 
-const std::string & Simple::get_name() const {
+const string & Simple::get_name() const {
     return name;
 }
 
 void Simple::add_card(const Card &c) {
     hand.push_back(c);
     // Sort hand after adding new card
-    std::sort(hand.begin(), hand.end());
+    sort(hand.begin(), hand.end());
 }
 
 bool Simple::make_trump(const Card &upcard, bool is_dealer,
@@ -137,7 +137,7 @@ bool Simple::make_trump(const Card &upcard, bool is_dealer,
 
 void Simple::add_and_discard(const Card &upcard) {
     hand.push_back(upcard);
-    std::sort(hand.begin(), hand.end());
+    sort(hand.begin(), hand.end());
     //try to discard a non-trump card
     for (size_t i = 0; i < hand.size(); ++i) {
         if (!hand[i].is_trump(upcard.get_suit())) {
@@ -152,7 +152,7 @@ void Simple::add_and_discard(const Card &upcard) {
 //When a Simple Player leads a trick, they play the highest non-trump card in their hand
 //If they have only trump cards, they play the highest trump card in their hand.
 Card Simple::lead_card(Suit trump) {
-    std::sort(hand.begin(), hand.end());
+    sort(hand.begin(), hand.end());
 
     // First try to find highest non-trump card
     int non_trump_index = find_highest_non_trump_card(trump);
@@ -193,8 +193,9 @@ Card Simple::lead_card(Suit trump) {
 }
 
 // Helper method to find cards that follow the led suit
-std::vector<int> Simple::find_following_suit_cards(const Card &led_card, Suit trump) const {
-    std::vector<int> following_suit_indices;
+vector<int> Simple::find_following_suit_cards(const Card &led_card, 
+Suit trump) const {
+    vector<int> following_suit_indices;
     for (int i = 0; i < hand.size(); ++i) {
         if (hand[i].get_suit(trump) == led_card.get_suit(trump)) {
             following_suit_indices.push_back(i);
@@ -204,7 +205,8 @@ std::vector<int> Simple::find_following_suit_cards(const Card &led_card, Suit tr
 }
 
 // Helper method to find the best card among those that follow suit
-int Simple::find_best_following_suit_card(const std::vector<int> &indices, Suit trump) const {
+int Simple::find_best_following_suit_card(const vector<int> &indices, 
+Suit trump) const {
     int best_index = indices[0];
     
     for (int i : indices) {
@@ -252,10 +254,10 @@ int Simple::find_lowest_non_bower_trump(Suit trump) const {
 }
 
 Card Simple::play_card(const Card &led_card, Suit trump) {
-    std::sort(hand.begin(), hand.end());
+    sort(hand.begin(), hand.end());
 
     // Find cards that follow suit
-    std::vector<int> following_suit_indices = find_following_suit_cards(led_card, trump);
+    vector<int> following_suit_indices = find_following_suit_cards(led_card, trump);
     
     // If we found cards that follow suit, determine the best one
     if (!following_suit_indices.empty()) {
@@ -342,7 +344,7 @@ int Simple::find_highest_trump_card(Suit trump) const {
 }
 
 // Human class implementations
-Human::Human(const std::string &name_in) : name(name_in) {}
+Human::Human(const string &name_in) : name(name_in) {}
 
 const string & Human::get_name() const {
     return name;
@@ -355,7 +357,7 @@ void Human::add_card(const Card &c) {
 
 void Human::print_hand() const {
     for (size_t i = 0; i < hand.size(); ++i) {
-        std::cout << "Card " << i << ": " << hand[i] << std::endl;
+        cout << "Card " << i << ": " << hand[i] << endl;
     }
 }
 
@@ -422,7 +424,7 @@ void Human::add_and_discard(const Card &upcard) {
     cout << endl;
 }
 
-Card Human::select_card_from_hand(const std::string &prompt) {
+Card Human::select_card_from_hand(const string &prompt) {
     // Print current hand
     for (size_t i = 0; i < hand.size(); ++i) {
         cout << "Human player " << name << "'s hand: "
@@ -451,6 +453,6 @@ Card Human::lead_card(Suit trump) {
 }
 
 Card Human::play_card(const Card &led_card, Suit trump) {
-    std::sort(hand.begin(), hand.end());
+    sort(hand.begin(), hand.end());
     return select_card_from_hand("please select a card:");
 }

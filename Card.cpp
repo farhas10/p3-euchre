@@ -35,14 +35,14 @@ Rank string_to_rank(const std::string &str) {
 }
 
 //EFFECTS Prints Rank to stream, for example "Two"
-std::ostream & operator<<(std::ostream &os, Rank rank) {
+ostream & operator<<(ostream &os, Rank rank) {
   os << RANK_NAMES[rank];
   return os;
 }
 
 //REQUIRES If any input is read, it must be a valid rank
 //EFFECTS Reads a Rank from a stream, for example "Two" -> TWO
-std::istream & operator>>(std::istream &is, Rank &rank) {
+istream & operator>>(istream &is, Rank &rank) {
   string str;
   if(is >> str) {
     rank = string_to_rank(str);
@@ -74,14 +74,14 @@ Suit string_to_suit(const std::string &str) {
 
 
 //EFFECTS Prints Suit to stream, for example "Spades"
-ostream & operator<<(std::ostream &os, Suit suit) {
+ostream & operator<<(ostream &os, Suit suit) {
   os << SUIT_NAMES[suit];
   return os;
 }
 
 //REQUIRES If any input is read, it must be a valid suit
 //EFFECTS Reads a Suit from a stream, for example "Spades" -> SPADES
-istream & operator>>(std::istream &is, Suit &suit) {
+istream & operator>>(istream &is, Suit &suit) {
   string str;
   if (is >> str) {
     suit = string_to_suit(str);
@@ -154,18 +154,18 @@ bool Card::is_trump(Suit trump) const{
 }
 
 
-ostream & operator<<(std::ostream &os, const Card &card){
+ostream & operator<<(ostream &os, const Card &card){
   os << card.get_rank() << " of " << card.get_suit();
   return os;
 }
 
 
-istream & operator>>(std::istream &is, Card &card){
-  std::string rank_str, of_str, suit_str;
+istream & operator>>(istream &is, Card &card){
+  string rank_str, of_str, suit_str;
   is >> rank_str >> of_str >> suit_str;
 
   if (of_str != "of") {
-    is.setstate(std::ios::failbit); 
+    is.setstate(ios::failbit); 
     return is;
   }
   
@@ -174,7 +174,7 @@ istream & operator>>(std::istream &is, Card &card){
   
   // Check if either rank or suit is invalid
   if (rank < TWO || rank > ACE || suit < SPADES || suit > DIAMONDS) {
-    is.setstate(std::ios::failbit);
+    is.setstate(ios::failbit);
     return is;
   }
   
