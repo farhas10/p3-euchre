@@ -24,6 +24,27 @@ public:
     virtual Card lead_card(Suit trump) override;
     
     virtual Card play_card(const Card &led_card, Suit trump) override;
+
+    // Helper method to find cards that follow the led suit
+    std::vector<int> find_following_suit_cards(const Card &led_card, Suit trump) const;
+
+    // Helper method to find the best card among those that follow suit
+    int find_best_following_suit_card(const std::vector<int> &indices, Suit trump) const;
+
+    // Helper method to find the lowest non-trump card
+    int find_lowest_non_trump_card(Suit trump) const;
+
+    // Helper method to find the lowest trump card that's not a bower
+    int find_lowest_non_bower_trump(Suit trump) const;
+
+    // Helper method to find the highest non-trump card
+    int find_highest_non_trump_card(Suit trump) const;
+
+    // Helper method to find special bower cards
+    int find_bower(Suit trump, bool right_bower) const;
+
+    // Helper method to find the highest trump card
+    int find_highest_trump_card(Suit trump) const;
 };
 
 class Human : public Player {
@@ -134,128 +155,133 @@ Card Simple::lead_card(Suit trump) {
     std::sort(hand.begin(), hand.end());
 
     // First try to find highest non-trump card
-    for (int i = hand.size() - 1; i >= 0; i--) {
-        if (!hand[i].is_trump(trump)) {
-            Card card_to_play = hand[i];
-            hand.erase(hand.begin() + i);
-            return card_to_play;
-        }
+    int non_trump_index = find_highest_non_trump_card(trump);
+    if (non_trump_index != -1) {
+        Card card_to_play = hand[non_trump_index];
+        hand.erase(hand.begin() + non_trump_index);
+        return card_to_play;
     }
 
     // Right bower
-    for (int i = hand.size() - 1; i >= 0; i--) {
-        if (hand[i].is_right_bower(trump)) {
-            Card card_to_play = hand[i];
-            hand.erase(hand.begin() + i);
-            return card_to_play;
-        }
+    int right_bower_index = find_bower(trump, true);
+    if (right_bower_index != -1) {
+        Card card_to_play = hand[right_bower_index];
+        hand.erase(hand.begin() + right_bower_index);
+        return card_to_play;
     }
 
     // Left bower
-    for (int i = hand.size() - 1; i >= 0; i--) {
-        if (hand[i].is_left_bower(trump)) {
-            Card card_to_play = hand[i];
-            hand.erase(hand.begin() + i);
-            return card_to_play;
-        }
+    int left_bower_index = find_bower(trump, false);
+    if (left_bower_index != -1) {
+        Card card_to_play = hand[left_bower_index];
+        hand.erase(hand.begin() + left_bower_index);
+        return card_to_play;
     }
 
     // Highest trump card
-    int highest_trump_index = -1;
-    for (int i = hand.size() - 1; i >= 0; i--) {
-        if (hand[i].is_trump(trump)) {
-            if (highest_trump_index == -1 || hand[i] > hand[highest_trump_index]) {
-                highest_trump_index = i;  // Track highest trump card
-            }
-        }
-    }
+    int highest_trump_index = find_highest_trump_card(trump);
     if (highest_trump_index != -1) {
         Card card_to_play = hand[highest_trump_index];
         hand.erase(hand.begin() + highest_trump_index);
         return card_to_play;
     }
 
+    // If all else fails, play the last card
     Card card_to_play = hand.back();
     hand.pop_back();
     return card_to_play;
 }
 
-Card Simple::play_card(const Card &led_card, Suit trump) {
-    std::sort(hand.begin(), hand.end());
-
-    // First pass: Find cards that follow suit
-    vector<int> following_suit_indices;
+// Helper method to find cards that follow the led suit
+std::vector<int> Simple::find_following_suit_cards(const Card &led_card, Suit trump) const {
+    std::vector<int> following_suit_indices;
     for (int i = 0; i < hand.size(); ++i) {
         if (hand[i].get_suit(trump) == led_card.get_suit(trump)) {
             following_suit_indices.push_back(i);
         }
     }
+    return following_suit_indices;
+}
+
+// Helper method to find the best card among those that follow suit
+int Simple::find_best_following_suit_card(const std::vector<int> &indices, Suit trump) const {
+    int best_index = indices[0];
+    
+    for (int i : indices) {
+        if (hand[i].is_right_bower(trump)) {
+            return i;  // Right bower is always best
+        }
+        if (hand[i].is_left_bower(trump) && !hand[best_index].is_right_bower(trump)) {
+            best_index = i;
+            continue;
+        }
+        bool current_is_bower = hand[best_index].is_right_bower(trump) || 
+                              hand[best_index].is_left_bower(trump);
+        
+        if (!current_is_bower && hand[i] > hand[best_index]) {
+            best_index = i;
+        }
+    }
+    return best_index;
+}
+
+// Helper method to find the lowest non-trump card
+int Simple::find_lowest_non_trump_card(Suit trump) const {
+    int lowest_i = -1;
+    for (int i = 0; i < hand.size(); ++i) {
+        if (!hand[i].is_trump(trump) && 
+            !hand[i].is_left_bower(trump) && !hand[i].is_right_bower(trump)) {
+            if (lowest_i == -1 || hand[i] < hand[lowest_i])
+                lowest_i = i;
+        }
+    }
+    return lowest_i;
+}
+
+// Helper method to find the lowest trump card that's not a bower
+int Simple::find_lowest_non_bower_trump(Suit trump) const {
+    int lowest_i_trump = -1;
+    for (int i = 0; i < hand.size(); ++i) {
+        if (hand[i].is_trump(trump) && !hand[i].is_left_bower(trump) 
+            && !hand[i].is_right_bower(trump)) {
+            if (lowest_i_trump == -1 || hand[i] < hand[lowest_i_trump])
+                lowest_i_trump = i;
+        }
+    }
+    return lowest_i_trump;
+}
+
+Card Simple::play_card(const Card &led_card, Suit trump) {
+    std::sort(hand.begin(), hand.end());
+
+    // Find cards that follow suit
+    std::vector<int> following_suit_indices = find_following_suit_cards(led_card, trump);
     
     // If we found cards that follow suit, determine the best one
     if (!following_suit_indices.empty()) {
-        int best_index = following_suit_indices[0];
-        
-        // Second pass: Find the best card among those that follow suit
-        for (int i : following_suit_indices) {
-            // Right bower is always best
-            if (hand[i].is_right_bower(trump)) {
-                best_index = i;
-                break;  // No need to check further
-            }
-            
-            // Left bower is next best, but only if current best isn't right bower
-            if (hand[i].is_left_bower(trump) && !hand[best_index].is_right_bower(trump)) {
-                best_index = i;
-                continue;
-            }
-            
-            // For regular cards, compare if neither current nor best is a bower
-            bool current_is_bower = hand[best_index].is_right_bower(trump) || 
-                                   hand[best_index].is_left_bower(trump);
-            
-            if (!current_is_bower && hand[i] > hand[best_index]) {
-                best_index = i;
-            }
-        }
-        
-        // Return the best card that follows suit
+        int best_index = find_best_following_suit_card(following_suit_indices, trump);
         Card card_to_play = hand[best_index];
         hand.erase(hand.begin() + best_index);
         return card_to_play;
     }
 
-    // Rest of the method (for when no card follows suit) remains unchanged
-    //if cannot follow suit, try to play the lowest non-trump card (avoiding bowers)
-    int lowest_i = -1;
-    for (int i = 0; i < hand.size(); ++i) {
-        if (!hand[i].is_trump(trump) 
-        && !hand[i].is_left_bower(trump) && !hand[i].is_right_bower(trump)) {
-            if (lowest_i == -1 || hand[i] < hand[lowest_i])
-                lowest_i = i;
-        }
-    }
+    // If cannot follow suit, try to play the lowest non-trump card
+    int lowest_i = find_lowest_non_trump_card(trump);
     if (lowest_i != -1) {
         Card card_to_play = hand[lowest_i];
         hand.erase(hand.begin() + lowest_i);
         return card_to_play;
     }
 
-    //if only trump cards remain, try to find a non-bower trump card
-    int lowest_i_trump = -1;
-    for (int i = 0; i < hand.size(); ++i) {
-        if (hand[i].is_trump(trump) && !hand[i].is_left_bower(trump) 
-        && !hand[i].is_right_bower(trump)) {
-            if (lowest_i_trump == -1 || hand[i] < hand[lowest_i_trump])
-                lowest_i_trump = i;
-        }
-    }
+    // If only trump cards remain, try to find a non-bower trump card
+    int lowest_i_trump = find_lowest_non_bower_trump(trump);
     if (lowest_i_trump != -1) {
         Card card_to_play = hand[lowest_i_trump];
         hand.erase(hand.begin() + lowest_i_trump);
         return card_to_play;
     }
 
-    //if no non-bower trump exists, then if the left bower is in hand, play it
+    // If no non-bower trump exists, then if the left bower is in hand, play it
     for (int i = 0; i < hand.size(); ++i) {
         if (hand[i].is_left_bower(trump)) {
             Card card_to_play = hand[i];
@@ -264,7 +290,7 @@ Card Simple::play_card(const Card &led_card, Suit trump) {
         }
     }
 
-    //if needed, play any trump card (could be right bower)
+    // If needed, play any trump card (could be right bower)
     for (int i = 0; i < hand.size(); ++i) {
         if (hand[i].is_trump(trump)) {
             Card card_to_play = hand[i];
@@ -273,10 +299,47 @@ Card Simple::play_card(const Card &led_card, Suit trump) {
         }
     }
 
+    // If all else fails, play the first card
     Card card_to_play = hand.front();
     hand.erase(hand.begin());
     return card_to_play;
-} 
+}
+
+// Helper method to find the highest non-trump card
+int Simple::find_highest_non_trump_card(Suit trump) const {
+    for (int i = hand.size() - 1; i >= 0; i--) {
+        if (!hand[i].is_trump(trump)) {
+            return i;
+        }
+    }
+    return -1;  // No non-trump cards found
+}
+
+// Helper method to find special bower cards
+int Simple::find_bower(Suit trump, bool right_bower) const {
+    for (int i = hand.size() - 1; i >= 0; i--) {
+        if (right_bower && hand[i].is_right_bower(trump)) {
+            return i;
+        }
+        else if (!right_bower && hand[i].is_left_bower(trump)) {
+            return i;
+        }
+    }
+    return -1;  // Bower not found
+}
+
+// Helper method to find the highest trump card
+int Simple::find_highest_trump_card(Suit trump) const {
+    int highest_trump_index = -1;
+    for (int i = hand.size() - 1; i >= 0; i--) {
+        if (hand[i].is_trump(trump)) {
+            if (highest_trump_index == -1 || hand[i] > hand[highest_trump_index]) {
+                highest_trump_index = i;
+            }
+        }
+    }
+    return highest_trump_index;
+}
 
 // Human class implementations
 Human::Human(const std::string &name_in) : name(name_in) {}

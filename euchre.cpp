@@ -135,6 +135,9 @@ void Game::play(){
     hand++;
   }
   print_winner();
+  for (size_t i = 0; i < players.size(); ++i) {
+    delete players[i];
+  }
 }
 
 //Accesses the private player vector to set the new variables.
@@ -233,25 +236,30 @@ void Game::make_trump(){
   }
   
   // Round 2 if needed
-  if(!trump_chosen) {
-    for(int i = 1; i <= 4; ++i) {
-      int current_player = (dealer + i) % 4;
-      bool is_dealer = (current_player == dealer);
-      
-      if(players[current_player]->make_trump(upcard, is_dealer, 2, trump)) {
-        cout << players[current_player]->get_name() << " orders up " << trump << endl;
-        trump_team = current_player % 2;
-        cout << endl;
-        break;
-      } else {
-        cout << players[current_player]->get_name() << " passes" << endl;
-        if(is_dealer) {
-          trump = Suit_next(upcard.get_suit());
-          cout << players[dealer]->get_name() << " must order up " << trump << endl;
-          trump_team = dealer % 2;
-          cout << endl;
-        }
-      }
+  if(trump_chosen) {
+    return; // Early return to avoid nested block
+  }
+  
+  // Continue with round 2
+  for(int i = 1; i <= 4; ++i) {
+    int current_player = (dealer + i) % 4;
+    bool is_dealer = (current_player == dealer);
+    
+    if(players[current_player]->make_trump(upcard, is_dealer, 2, trump)) {
+      cout << players[current_player]->get_name() << " orders up " << trump << endl;
+      trump_team = current_player % 2;
+      cout << endl;
+      return; // Exit after trump is chosen
+    }
+    
+    cout << players[current_player]->get_name() << " passes" << endl;
+    
+    // Handle dealer separately to avoid deep nesting
+    if(is_dealer) {
+      trump = Suit_next(upcard.get_suit());
+      cout << players[dealer]->get_name() << " must order up " << trump << endl;
+      trump_team = dealer % 2;
+      cout << endl;
     }
   }
 }

@@ -74,14 +74,14 @@ Suit string_to_suit(const std::string &str) {
 
 
 //EFFECTS Prints Suit to stream, for example "Spades"
-std::ostream & operator<<(std::ostream &os, Suit suit) {
+ostream & operator<<(std::ostream &os, Suit suit) {
   os << SUIT_NAMES[suit];
   return os;
 }
 
 //REQUIRES If any input is read, it must be a valid suit
 //EFFECTS Reads a Suit from a stream, for example "Spades" -> SPADES
-std::istream & operator>>(std::istream &is, Suit &suit) {
+istream & operator>>(std::istream &is, Suit &suit) {
   string str;
   if (is >> str) {
     suit = string_to_suit(str);
@@ -153,14 +153,14 @@ bool Card::is_trump(Suit trump) const{
   }
 }
 
-//std::ostream & operator<<(std::ostream &os, const Card &card)
-std::ostream & operator<<(std::ostream &os, const Card &card){
+
+ostream & operator<<(std::ostream &os, const Card &card){
   os << card.get_rank() << " of " << card.get_suit();
   return os;
 }
 
-//std::istream & operator>>(std::istream &is, Card &card)
-std::istream & operator>>(std::istream &is, Card &card){
+
+istream & operator>>(std::istream &is, Card &card){
   std::string rank_str, of_str, suit_str;
   is >> rank_str >> of_str >> suit_str;
 
@@ -196,13 +196,6 @@ bool operator<(const Card &lhs, const Card &rhs){
 
 //bool operator<=(const Card &lhs, const Card &rhs)
 bool operator<=(const Card &lhs, const Card &rhs){
-  /*if (lhs.get_rank() < rhs.get_rank()){
-    return true;
-  }
-  if (lhs.get_rank() == rhs.get_rank()){
-    return lhs.get_suit() <= rhs.get_suit();
-  }
-  return false;*/
   return !(lhs > rhs);
 }
 
@@ -219,13 +212,6 @@ bool operator>(const Card &lhs, const Card &rhs){
 
 //bool operator>=(const Card &lhs, const Card &rhs)
 bool operator>=(const Card &lhs, const Card &rhs){
-  /*if (lhs.get_rank() > rhs.get_rank()){
-    return true;
-  }
-  if (lhs.get_rank() == rhs.get_rank()){
-    return lhs.get_suit() >= rhs.get_suit();
-  }
-  return false;*/
   return !(lhs < rhs);
 }
 
