@@ -251,8 +251,9 @@ bool operator!=(const Card &lhs, const Card &rhs){
 //   operator==
 //   operator!=
 
-bool Card_less(const Card &a, const Card &b, const Card &led_card, Suit trump){
-  // Handle bower cases first
+// Helper function for both Card_less versions
+bool Card_less_helper(const Card &a, const Card &b, Suit trump) {
+    // Handle bower cases first
     if (a.is_right_bower(trump)) return false;
     if (b.is_right_bower(trump)) return true;
     if (a.is_left_bower(trump)) return false;
@@ -266,37 +267,28 @@ bool Card_less(const Card &a, const Card &b, const Card &led_card, Suit trump){
     if (a.get_suit(trump) == b.get_suit(trump)) {
         return a.get_rank() < b.get_rank();
     }
-
-    // If one of the cards follows the led suit but neither is trump
-    if (a.get_suit(trump) == led_card.get_suit(trump) && b.get_suit(trump) != led_card.get_suit(trump)) {
-        return false;
-    }
-    if (b.get_suit(trump) == led_card.get_suit(trump) && a.get_suit(trump) != led_card.get_suit(trump)) {
-        return true;
-    }
-
-    // In any other case, a is not less than b
-    return false;
+    
+    return false; // Default case
 }
 
-bool Card_less(const Card &a, const Card &b, Suit trump){
-  // Handle bower cases first
-    if (a.is_right_bower(trump)) return false;
-    if (b.is_right_bower(trump)) return true;
-    if (a.is_left_bower(trump)) return false;
-    if (b.is_left_bower(trump)) return true;
-
-    // Then handle trump vs non-trump
-    if (a.get_suit(trump) == trump && b.get_suit(trump) != trump) return false;
-    if (a.get_suit(trump) != trump && b.get_suit(trump) == trump) return true;
-
-    // If both are trump or both are not trump, compare ranks
-    if (a.get_suit(trump) == b.get_suit(trump)) {
-        return a.get_rank() < b.get_rank();
+bool Card_less(const Card &a, const Card &b, const Card &led_card, Suit trump) {
+    // Use helper function for common logic
+    bool result = Card_less_helper(a, b, trump);
+    
+    // Only add led card specific logic if not already determined
+    if (a.get_suit(trump) != b.get_suit(trump) && 
+        !a.is_trump(trump) && !b.is_trump(trump)) {
+        
+        // If one of the cards follows the led suit but neither is trump
+        if (a.get_suit(trump) == led_card.get_suit(trump)) return false;
+        if (b.get_suit(trump) == led_card.get_suit(trump)) return true;
     }
+    
+    return result;
+}
 
-    // If different non-trump suits, a is not less than b
-    return false;
+bool Card_less(const Card &a, const Card &b, Suit trump) {
+    return Card_less_helper(a, b, trump);
 }
 
 Suit Suit_next(Suit suit){

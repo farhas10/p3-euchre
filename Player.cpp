@@ -17,7 +17,7 @@ public:
     virtual void add_card(const Card &c) override;
 
     virtual bool make_trump(const Card &upcard, bool is_dealer,
-                          int round, Suit &order_up_suit) const override;
+        int round, Suit &order_up_suit) const override;
 
     virtual void add_and_discard(const Card &upcard) override;
 
@@ -35,12 +35,14 @@ public:
     virtual const std::string & get_name() const override;
     virtual void add_card(const Card &c) override;
     virtual bool make_trump(const Card &upcard, bool is_dealer,
-                    int round, Suit &order_up_suit) const override;
+                          int round, Suit &order_up_suit) const override;
     virtual void add_and_discard(const Card &upcard) override;
     virtual Card lead_card(Suit trump) override;
     virtual Card play_card(const Card &led_card, Suit trump) override;
     void print_hand() const;
     Card card_from_input() const;
+    Card select_card_from_hand(const std::string &prompt);
+};
 
 // Factory function implementation
 Player * Player_factory(const std::string &name, const std::string &strategy) {
@@ -76,7 +78,7 @@ void Simple::add_card(const Card &c) {
 }
 
 bool Simple::make_trump(const Card &upcard, bool is_dealer,
-                       int round, Suit &order_up_suit) const {
+    int round, Suit &order_up_suit) const {
     if (hand.empty()) {
         return false;
     }
@@ -181,41 +183,53 @@ Card Simple::lead_card(Suit trump) {
 Card Simple::play_card(const Card &led_card, Suit trump) {
     std::sort(hand.begin(), hand.end());
 
-    //try to follow suit with the highest card
-    int highest_i = -1;
-   for (int i = 0; i < hand.size(); ++i) {
+    // First pass: Find cards that follow suit
+    vector<int> following_suit_indices;
+    for (int i = 0; i < hand.size(); ++i) {
         if (hand[i].get_suit(trump) == led_card.get_suit(trump)) {
-            if (highest_i == -1) {
-                highest_i = i;
-            } else {
-                if (hand[i].is_right_bower(trump)) {
-                    highest_i = i;
-                } 
-                else if (hand[i].is_left_bower(trump)) {
-                    if (!hand[highest_i].is_right_bower(trump) 
-                    && !hand[highest_i].is_left_bower(trump)) {
-                        highest_i = i;
-                    }
-                }   
-                else if (!hand[highest_i].is_right_bower(trump) 
-                && !hand[highest_i].is_left_bower(trump) && hand[i] > hand[highest_i]) {
-                    highest_i = i;
-                }
+            following_suit_indices.push_back(i);
+        }
+    }
+    
+    // If we found cards that follow suit, determine the best one
+    if (!following_suit_indices.empty()) {
+        int best_index = following_suit_indices[0];
+        
+        // Second pass: Find the best card among those that follow suit
+        for (int i : following_suit_indices) {
+            // Right bower is always best
+            if (hand[i].is_right_bower(trump)) {
+                best_index = i;
+                break;  // No need to check further
+            }
+            
+            // Left bower is next best, but only if current best isn't right bower
+            if (hand[i].is_left_bower(trump) && !hand[best_index].is_right_bower(trump)) {
+                best_index = i;
+                continue;
+            }
+            
+            // For regular cards, compare if neither current nor best is a bower
+            bool current_is_bower = hand[best_index].is_right_bower(trump) || 
+                                   hand[best_index].is_left_bower(trump);
+            
+            if (!current_is_bower && hand[i] > hand[best_index]) {
+                best_index = i;
             }
         }
-    }   
-
-    if (highest_i != -1) {
-        Card card_to_play = hand[highest_i];
-        hand.erase(hand.begin() + highest_i);
+        
+        // Return the best card that follows suit
+        Card card_to_play = hand[best_index];
+        hand.erase(hand.begin() + best_index);
         return card_to_play;
     }
 
+    // Rest of the method (for when no card follows suit) remains unchanged
     //if cannot follow suit, try to play the lowest non-trump card (avoiding bowers)
     int lowest_i = -1;
     for (int i = 0; i < hand.size(); ++i) {
-        if (!hand[i].is_trump(trump) && !hand[i].is_left_bower(trump) 
-        && !hand[i].is_right_bower(trump)) {
+        if (!hand[i].is_trump(trump) 
+        && !hand[i].is_left_bower(trump) && !hand[i].is_right_bower(trump)) {
             if (lowest_i == -1 || hand[i] < hand[lowest_i])
                 lowest_i = i;
         }
@@ -345,7 +359,7 @@ void Human::add_and_discard(const Card &upcard) {
     cout << endl;
 }
 
-Card Human::lead_card(Suit trump) {
+Card Human::select_card_from_hand(const std::string &prompt) {
     // Print current hand
     for (size_t i = 0; i < hand.size(); ++i) {
         cout << "Human player " << name << "'s hand: "
@@ -354,7 +368,7 @@ Card Human::lead_card(Suit trump) {
     
     // Prompt for card selection
     cout << "Human player " << name 
-         << ", please select a card:" << endl;
+         << ", " << prompt << endl;
     
     int index;
     cin >> index;
@@ -369,27 +383,11 @@ Card Human::lead_card(Suit trump) {
     return card_to_play;
 }
 
+Card Human::lead_card(Suit trump) {
+    return select_card_from_hand("please select a card:");
+}
+
 Card Human::play_card(const Card &led_card, Suit trump) {
     std::sort(hand.begin(), hand.end());
-    // Print current hand
-    for (size_t i = 0; i < hand.size(); ++i) {
-        cout << "Human player " << name << "'s hand: "
-             << "[" << i << "] " << hand[i] << "\n";
-    }
-    
-    // Prompt for card selection
-    cout << "Human player " << name 
-         << ", please select a card:" << endl;
-    
-    int index;
-    cin >> index;
-    
-    // Handle invalid input
-    if (index < 0 || index >= static_cast<int>(hand.size())) {
-        index = 0;
-    }
-    
-    Card card_to_play = hand[index];
-    hand.erase(hand.begin() + index);
-    return card_to_play;
+    return select_card_from_hand("please select a card:");
 }
