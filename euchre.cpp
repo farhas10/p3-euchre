@@ -254,7 +254,7 @@ void Game::make_trump(){
     
     cout << players[current_player]->get_name() << " passes" << endl;
     
-    // Handle dealer separately to avoid deep nesting
+    // Handle dealer separately
     if(is_dealer) {
       trump = Suit_next(upcard.get_suit());
       cout << players[dealer]->get_name() << " must order up " << trump << endl;
